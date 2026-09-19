@@ -64,3 +64,4 @@ export async function POST(
     return apiError('Невалидный JSON в теле запроса или ошибка сервера');
   }
 }
+

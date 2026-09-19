@@ -1,23 +1,31 @@
+import { IVideoItem } from '@/app/api/_utils';
 import { YouTubePlayer } from '@/shared/ui/YouTubePlayer';
 import Link from 'next/link';
 
 type VideoScreenProps = {
-  videoId: string;
+  video: IVideoItem;
 };
 
-export const VideoScreen = ({ videoId }: VideoScreenProps) => {
-  if (!videoId) return null;
+export const VideoScreen = ({ video }: VideoScreenProps) => {
+  if (!video) return null;
 
   return (
-    <>
-      <YouTubePlayer videoId={videoId} autoplay />
+    <div className="mx-auto w-full max-w-7xl">
+      <YouTubePlayer videoId={video.videoId} autoplay />
 
-      <div className="mt-3">
-        <h2 className="mb-2 text-2xl font-bold">Название ролика</h2>
-        <Link href={`/`} className="text-zinc block" style={{}}>
-          Название канала
+      <div className="mt-4">
+        <h2 className="text-l mb-2 font-bold text-white sm:text-2xl">
+          {video.title}
+        </h2>
+        <Link
+          href={video.authorUrl || '#'}
+          className="block w-fit text-sm text-zinc-400 hover:text-zinc-200 hover:underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {video.authorName}
         </Link>
       </div>
-    </>
+    </div>
   );
 };

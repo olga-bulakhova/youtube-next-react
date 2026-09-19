@@ -1,12 +1,17 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { MenuLink } from './MenuLink';
 import HomeIcon from '@/shared/assets/icons/home.svg';
 import ProfileIcon from '@/shared/assets/icons/profile.svg';
 import AddIcon from '@/shared/assets/icons/add.svg';
 import VideoIcon from '@/shared/assets/icons/video.svg';
-import { MenuLink } from './MenuLink';
-import React from 'react';
+import { useSidebar } from '../SidebarContext';
+import Logo from '../Header/logo.png';
 
 export const LeftMenu = () => {
   const profileId = '123';
+
+  const { toggleSidebar, closeSidebar } = useSidebar();
 
   const menuItems = [
     { href: '/', icon: HomeIcon, alt: 'Home', label: 'Главная' },
@@ -15,7 +20,6 @@ export const LeftMenu = () => {
       icon: ProfileIcon,
       alt: 'Profile',
       label: 'Профиль',
-      hasDivider: true,
     },
     {
       href: '/editor/add-video',
@@ -32,18 +36,34 @@ export const LeftMenu = () => {
   ];
 
   return (
-    <aside className="h-full py-4">
-      <nav className="flex flex-col gap-1">
-        {menuItems.map((item) => (
-          <React.Fragment key={item.href + item.label}>
-            <MenuLink href={item.href} icon={item.icon} alt={item.alt}>
-              {item.label}
-            </MenuLink>
+    <div className="flex h-full flex-col gap-4">
+      <div className="flex items-center gap-3 px-2 pb-2">
+        <button
+          onClick={toggleSidebar}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+          aria-label="Закрыть меню"
+        >
+          <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
+            <path d="M21 6H3V5h18v11zm0 5H3v1h18v-1zm0 6H3v1h18v-1z" />
+          </svg>
+        </button>
+        <Link href="/" className="flex items-center">
+          <Image src={Logo} alt="Logo" width={40} height={40} />
+        </Link>
+      </div>
 
-            {item.hasDivider && <div className="my-2 h-px bg-zinc-800" />}
-          </React.Fragment>
+      <nav onClick={closeSidebar} className="flex w-full flex-col gap-1">
+        {menuItems.map((item) => (
+          <MenuLink
+            key={item.href + item.label}
+            href={item.href}
+            icon={item.icon}
+            alt={item.alt}
+          >
+            {item.label}
+          </MenuLink>
         ))}
       </nav>
-    </aside>
+    </div>
   );
 };

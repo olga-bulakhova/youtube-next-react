@@ -2,25 +2,13 @@
 
 import { YouTubePlayer } from '@/shared/ui/YouTubePlayer';
 import { useAddVideoForm } from '../model/useAddVideoForm';
-
-export const CATEGORIES = [
-  { value: 'music', label: 'Музыка' },
-  { value: 'gaming', label: 'Видеоигры' },
-  { value: 'education', label: 'Образование' },
-  { value: 'blogs', label: 'Блоги' },
-  { value: 'tech', label: 'Технологии и IT' },
-  { value: 'comedy', label: 'Юмор' },
-  { value: 'science', label: 'Наука' },
-  { value: 'sports', label: 'Спорт' },
-];
+import { CATEGORIES } from '@/shared/constants';
 
 export const AddVideoScreen = () => {
   const { videoId, onSubmit, handleSubmit, ...form } = useAddVideoForm();
 
-  console.log(videoId);
-
   return (
-    <div className="mx-auto max-w-xl px-4 pt-8">
+    <div className="mx-auto max-w-lg px-4 pt-8 md:min-w-xl">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="mb-6 flex flex-col gap-4"

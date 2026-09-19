@@ -16,7 +16,7 @@ export const VideosGrid = ({ videos }: VideosGridProps) => {
   }
 
   return (
-    <div className="mx-auto grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="mx-auto grid grid-cols-1 gap-0 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
       {videos.map((video) => (
         <div
           key={video.videoId}

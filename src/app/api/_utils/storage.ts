@@ -41,4 +41,16 @@ export const db = {
       ...new Set(Array.from(videosMap.values(), (video) => video.category)),
     ];
   },
+
+  getVideosByCategory: (category: string): IVideoItem[] => {
+    const cleanCategory = category.toLowerCase().trim();
+
+    return Array.from(videosMap.values()).filter(
+      (video) => video.category.toLowerCase().trim() === cleanCategory,
+    );
+  },
+
+  getVideoById: (videoId: string): IVideoItem | undefined => {
+    return videosMap.get(videoId);
+  },
 };
