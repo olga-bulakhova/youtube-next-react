@@ -1,5 +1,5 @@
 import { VideosListScreen } from '@/screen/VideoListScreen';
-import { db } from '@/app/api/_utils/storage';
+import { db } from '@/app/api/videos/_storage/videosStorage';
 
 export const dynamic = 'force-dynamic';
 

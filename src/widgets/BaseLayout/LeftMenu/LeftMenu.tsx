@@ -1,12 +1,10 @@
-import Image from 'next/image';
-import Link from 'next/link';
 import { MenuLink } from './MenuLink';
 import HomeIcon from '@/shared/assets/icons/home.svg';
 import ProfileIcon from '@/shared/assets/icons/profile.svg';
 import AddIcon from '@/shared/assets/icons/add.svg';
 import VideoIcon from '@/shared/assets/icons/video.svg';
 import { useSidebar } from '../SidebarContext';
-import Logo from '../Header/logo.png';
+import { MainLogo } from '@/shared/ui/MainLogo';
 
 export const LeftMenu = () => {
   const profileId = '123';
@@ -47,9 +45,7 @@ export const LeftMenu = () => {
             <path d="M21 6H3V5h18v11zm0 5H3v1h18v-1zm0 6H3v1h18v-1z" />
           </svg>
         </button>
-        <Link href="/" className="flex items-center">
-          <Image src={Logo} alt="Logo" width={40} height={27.5} />
-        </Link>
+        <MainLogo />
       </div>
 
       <nav onClick={closeSidebar} className="flex w-full flex-col gap-1">

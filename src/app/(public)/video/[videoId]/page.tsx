@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { db } from '@/app/api/_utils/storage';
+import { db } from '@/app/api/videos/_storage/videosStorage';
 import { VideoScreen } from '@/screen/VideoScreen';
 
 export const dynamic = 'force-dynamic';

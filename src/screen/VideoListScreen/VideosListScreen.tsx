@@ -1,6 +1,7 @@
-import { IVideoItem } from '@/app/api/_utils';
+
 import { CategoriesTabs } from '@/widgets/CategoriesTabs.tsx/CategoriesTabs';
 import { VideosGrid } from './VideosGrid';
+import { IVideoItem } from '@/app/api/videos/_storage/types';
 
 type VideosListScreenProps = {
   videos: IVideoItem[];

@@ -1,5 +1,5 @@
 import { apiSuccess } from '../../_utils';
-import { db } from '../../_utils/storage';
+import { db } from '../_storage/videosStorage';
 
 export const dynamic = 'force-dynamic';
 

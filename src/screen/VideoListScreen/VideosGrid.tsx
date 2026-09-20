@@ -1,6 +1,7 @@
+import { IVideoItem } from '@/app/api/videos/_storage/types';
 import Image from 'next/image';
 import Link from 'next/link';
-import { IVideoItem } from '@/app/api/_utils';
+
 
 interface VideosGridProps {
   videos: IVideoItem[];

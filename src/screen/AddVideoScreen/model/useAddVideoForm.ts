@@ -1,10 +1,10 @@
 'use client';
 
-import { getYouTubeVideoId, isYouTubeDomain } from '@/shared/libs';
 import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { getYouTubeVideoId, isYouTubeDomain } from '@/shared/utils';
 
 const schema = z.object({
   videoUrl: z
@@ -43,7 +43,7 @@ export const useAddVideoForm = () => {
     try {
       const res = await fetch('/api/videos', {
         method: 'POST',
-        body: JSON.stringify({ videoId: currentVideoId, category, userId: 2 }),
+        body: JSON.stringify({ videoId: currentVideoId, category}),
         headers: { 'Content-Type': 'application/json' },
       });
 

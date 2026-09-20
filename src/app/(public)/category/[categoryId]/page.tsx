@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { VideosListScreen } from '@/screen/VideoListScreen';
-import { db } from '@/app/api/_utils/storage';
+import { db } from '@/app/api/videos/_storage/videosStorage';
 import { CATEGORIES } from '@/shared/constants';
 
 type CategoryPageProps = {

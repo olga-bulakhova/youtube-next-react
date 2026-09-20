@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { VideosListScreen } from '@/screen/VideoListScreen';
-import { db } from '@/app/api/_utils/storage';
+import { db } from '@/app/api/videos/_storage/videosStorage';
 import { CATEGORIES } from '@/shared/constants';
+import { requireServerAuth } from '@/shared/server';
+
 
 type MyVideosCategoryPageProps = {
   params: Promise<{ categoryId: string }>;
@@ -27,7 +29,7 @@ export default async function MyVideosCategoryPage({
   const { categoryId } = await params;
   const isCategoryValid = CATEGORIES.some((item) => item.value === categoryId);
 
-  const userId = 2;
+  const { userId } = await requireServerAuth();
 
   if (!isCategoryValid) {
     notFound();
