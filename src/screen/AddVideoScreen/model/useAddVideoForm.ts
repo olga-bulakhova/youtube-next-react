@@ -43,7 +43,7 @@ export const useAddVideoForm = () => {
     try {
       const res = await fetch('/api/videos', {
         method: 'POST',
-        body: JSON.stringify({ videoId: currentVideoId, category }),
+        body: JSON.stringify({ videoId: currentVideoId, category, userId: 2 }),
         headers: { 'Content-Type': 'application/json' },
       });
 

@@ -4,6 +4,7 @@ import { IVideoItem } from '@/app/api/_utils';
 
 interface VideosGridProps {
   videos: IVideoItem[];
+  userId?: number;
 }
 
 export const VideosGrid = ({ videos }: VideosGridProps) => {

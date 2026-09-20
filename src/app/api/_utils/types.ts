@@ -4,11 +4,13 @@ export interface IVideoItem {
   authorName: string;
   authorUrl: string;
   category: string;
+  userId: number;
 }
 
 export interface PostRequestBody {
   videoId: string;
   category: string;
+  userId: number;
 }
 
 export interface ApiSuccessResponse {

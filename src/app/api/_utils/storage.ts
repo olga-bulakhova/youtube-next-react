@@ -8,13 +8,14 @@ const videosMap =
   globalThis.prismaMockVideosMap ??
   new Map<string, IVideoItem>([
     [
-      'teEcuWCtySk',
+      '4qcPopWKJlQ',
       {
-        videoId: 'teEcuWCtySk',
+        videoId: '4qcPopWKJlQ',
         title: 'Вся правда про Next.js',
         authorName: 'Разработчик',
         authorUrl: 'https://youtube.com',
         category: 'tech',
+        userId: 1,
       },
     ],
   ]);
@@ -52,5 +53,34 @@ export const db = {
 
   getVideoById: (videoId: string): IVideoItem | undefined => {
     return videosMap.get(videoId);
+  },
+
+  getVideosByUserId: (userId: number): IVideoItem[] => {
+    return Array.from(videosMap.values()).filter(
+      (video) => video.userId === userId,
+    );
+  },
+
+  getVideosByUserIdAndCategory: (
+    userId: number,
+    category: string,
+  ): IVideoItem[] => {
+    const cleanCategory = category.toLowerCase().trim();
+
+    return Array.from(videosMap.values()).filter(
+      (video) =>
+        video.userId === userId &&
+        video.category.toLowerCase().trim() === cleanCategory,
+    );
+  },
+
+  getActiveCategoriesByUserId: (userId: number): string[] => {
+    const userVideos = Array.from(videosMap.values()).filter(
+      (video) => video.userId === userId,
+    );
+
+    const uniqueUserCategories = userVideos.map((video) => video.category);
+
+    return [...new Set(uniqueUserCategories)];
   },
 };

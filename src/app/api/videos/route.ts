@@ -11,7 +11,6 @@ import {
 export const dynamic = 'force-dynamic';
 
 export async function GET(): Promise<NextResponse<ApiSuccessResponse>> {
-  console.log(db.getAllVideos());
   return apiSuccess({ videos: db.getAllVideos() });
 }
 
@@ -29,7 +28,7 @@ export async function POST(
       return apiError('Категория видео (category) обязательна');
     }
 
-    const { videoId, category } = body;
+    const { videoId, category, userId } = body;
 
     if (db.hasVideo(videoId)) {
       return apiError('Это видео уже добавлено');
@@ -55,6 +54,7 @@ export async function POST(
       authorName: videoInfo.author_name || 'Неизвестный автор',
       authorUrl: videoInfo.author_url || '',
       category: category.toLowerCase().trim(),
+      userId
     };
 
     db.addVideo(videoId, newVideo);

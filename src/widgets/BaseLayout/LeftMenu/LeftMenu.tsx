@@ -28,7 +28,7 @@ export const LeftMenu = () => {
       label: 'Добавить видео',
     },
     {
-      href: `/profile/${profileId}/videos`,
+      href: '/my-videos',
       icon: VideoIcon,
       alt: 'Videos',
       label: 'Ваши видео',
@@ -48,7 +48,7 @@ export const LeftMenu = () => {
           </svg>
         </button>
         <Link href="/" className="flex items-center">
-          <Image src={Logo} alt="Logo" width={40} height={40} />
+          <Image src={Logo} alt="Logo" width={40} height={27.5} />
         </Link>
       </div>
 
