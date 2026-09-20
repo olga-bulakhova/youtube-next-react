@@ -4,7 +4,6 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
-import { setClientCookie, setClientJsonCookie } from '@/shared/utils/cookies';
 
 const schema = z
   .object({
@@ -68,9 +67,6 @@ export const useRegisterForm = () => {
       console.log(
         '[AUTH] Успешная регистрация. Данные сессии сохранены в cookies',
       );
-
-      setClientCookie('token', data.token);
-      setClientJsonCookie('user', data.user);
 
       router.replace('/');
     } catch (_) {

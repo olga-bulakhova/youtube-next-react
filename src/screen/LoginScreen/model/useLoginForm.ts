@@ -4,7 +4,6 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
-import { setClientCookie, setClientJsonCookie } from '@/shared/utils';
 
 const schema = z.object({
   username: z
@@ -61,9 +60,6 @@ export const useLoginForm = () => {
       }
 
       console.log('[AUTH] Успешный рантайм входа. Получен токен:', data.token);
-
-      setClientCookie('token', data.token);
-      setClientJsonCookie('user', data.user);
 
       router.replace('/');
       // router.refresh(); // Обновляем серверные компоненты лэйаута, чтобы обновить состояние хедера

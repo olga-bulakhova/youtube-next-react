@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server';
+import { apiSuccess, apiError } from '../../_utils';
+import {
+  ApiErrorResponse,
+  AuthRequestBody,
+  AuthSuccessResponse,
+  IUser,
+} from '../_storage/types';
 import { usersDb } from '../_storage/usersStorage';
-import { ApiErrorResponse, AuthRequestBody, AuthSuccessResponse, IUser } from '../_storage/types';
-import { apiError, apiSuccess } from '../../_utils';
+import { serverCookies } from '@/shared/server/cookies';
+import { generateToken } from '@/shared/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +18,7 @@ export async function POST(
   try {
     const body = (await request.json()) as AuthRequestBody;
 
-    // 1. ВАЛИДАЦИЯ СЕРВЕРА: Проверяем наличие и типы полей в прилетевшем JSON
+    // Валидация структуры запроса
     if (!body || !body.username || typeof body.username !== 'string') {
       return apiError(
         'Имя пользователя (username) обязательно для заполнения',
@@ -26,7 +33,6 @@ export async function POST(
     const usernameClean = body.username.trim();
     const passwordClean = body.password.trim();
 
-    // Защита от слишком коротких данных в обход клиентской формы
     if (usernameClean.length < 3) {
       return apiError(
         'Имя пользователя должно содержать минимум 3 символа',
@@ -38,42 +44,52 @@ export async function POST(
       return apiError('Пароль должен содержать минимум 6 символов', 400);
     }
 
-    // 2. ПРОВЕРКА НА УНИКАЛЬНОСТЬ: Проверяем, занят ли логин в нашей usersDb
+    // Проверка уникальности логина
     if (usersDb.isUsernameTaken(usernameClean)) {
       return apiError('Пользователь с таким именем уже зарегистрирован', 400);
     }
 
-    // 3. АВТОИНКРЕМЕНТ ID: Генерируем следующий доступный числовой ID (например, 2, 3...)
+    // Генерация автоинкрементного ID
     const newUserId = usersDb.getNextId();
 
-    // Формируем чистый публичный объект профиля без пароля
     const newUser: IUser = {
       id: newUserId,
       username: usernameClean,
       createdAt: new Date().toISOString(),
     };
 
-    // 4. ЗАПИСЬ В STORAGE: Сохраняем профиль и скрытый пароль в изолированные карты памяти
+    // Запись профиля и хэширование пароля в памяти сервера
     usersDb.addUser(newUser, passwordClean);
 
-    // Имитируем генерацию токена безопасности сессии (базовый base64 хэш для учебных целей)
-    const mockJwtToken = btoa(
-      JSON.stringify({ userId: newUserId, role: 'user' }),
-    );
+    // Генерация токена сессии
+    const fullTokenString = generateToken({
+      userId: newUser.id,
+      username: newUser.username,
+    });
 
     console.log(
-      `[AUTH] Успешная регистрация нового аккаунта. ID: ${newUserId}, Login: ${usernameClean}`,
+      `[AUTH] Новая регистрация и автологин. ID: ${newUserId}, Login: ${usernameClean}`,
     );
 
-    // 5. ОТВЕТ УСПЕХА (201 Created): Возвращаем структуру AuthSuccessResponse
+    // Подготавливаем чистый объект профиля для записи и ответа
+    const userData = {
+      id: newUser.id,
+      username: newUser.username,
+      createdAt: newUser.createdAt,
+    };
+
+    // Хелпер сам применит HttpOnly для токена и Lax политики для безопасности 🛡️
+    await serverCookies.setToken(fullTokenString);
+
+    // Возвращаем структуру AuthSuccessResponse
     return apiSuccess(
       {
-        user: newUser,
-        token: `mock_jwt_${mockJwtToken}`,
+        user: userData,
+        token: fullTokenString,
       },
       201,
     );
-  } catch (_) {
+  } catch (error) {
     return apiError(
       'Невалидный JSON в теле запроса или критическая ошибка сервера',
       400,

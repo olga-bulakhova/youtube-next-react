@@ -1,15 +1,22 @@
-'use client'; 
+'use client';
 
 import { useSidebar } from './SidebarContext';
 import { LeftMenu } from './LeftMenu';
 import { Suspense } from 'react';
+import { IUserCookie } from '@/app/api/auth/_storage/types';
 
-export const LayoutContent = ({ children }: { children: React.ReactNode }) => {
+type LayoutContentProps = {
+  children: React.ReactNode;
+  user: IUserCookie | null;
+};
+
+export const LayoutContent = ({ children, user }: LayoutContentProps) => {
   const { isOpen, toggleSidebar } = useSidebar();
 
   return (
     <>
       <main className="flex-1 py-4">{children}</main>
+
       <div
         onClick={toggleSidebar}
         className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
@@ -27,7 +34,7 @@ export const LayoutContent = ({ children }: { children: React.ReactNode }) => {
         <Suspense
           fallback={<div className="p-4 text-zinc-500">Загрузка...</div>}
         >
-          <LeftMenu />
+          <LeftMenu user={user} />
         </Suspense>
       </div>
     </>

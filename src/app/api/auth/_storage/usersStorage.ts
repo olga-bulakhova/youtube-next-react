@@ -54,7 +54,6 @@ export const usersDb = {
   addUser: (user: IUser, passwordPlain: string): void => {
     usersMap.set(user.id, user);
     usersMap.set(user.id, user);
-    console.log(hashPassword(passwordPlain));
     passwordsMap.set(user.id, hashPassword(passwordPlain));
   },
 

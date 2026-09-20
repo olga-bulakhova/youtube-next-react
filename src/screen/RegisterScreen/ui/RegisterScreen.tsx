@@ -34,7 +34,7 @@ export const RegisterScreen = () => {
             label="Пароль"
             type="password"
             placeholder="Придумайте надежный пароль..."
-            autoComplete="new-password" 
+            autoComplete="new-password"
             error={form.errors.password?.message}
             {...form.register('password')}
           />
@@ -52,7 +52,7 @@ export const RegisterScreen = () => {
           <div className="mt-6 flex items-center justify-between gap-4">
             <Link
               href="/auth/login"
-              className="text-sm font-medium text-blue-400 transition-colors hover:text-blue-300 hover:underline"
+              className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 hover:underline"
             >
               Уже есть аккаунт?
             </Link>

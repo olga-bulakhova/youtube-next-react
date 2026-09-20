@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
- // Импортируем нашу singleton-базу
+import { apiSuccess, apiError } from '../../_utils';
 import {
-
-  apiSuccess,
-  apiError,
-} from '../../_utils';
-import { ApiErrorResponse, AuthRequestBody, AuthSuccessResponse } from '../_storage/types';
+  ApiErrorResponse,
+  AuthRequestBody,
+  AuthSuccessResponse,
+} from '../_storage/types';
 import { usersDb } from '../_storage/usersStorage';
+import { serverCookies } from '@/shared/server';
+import { generateToken } from '@/shared/server/token';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,38 +35,44 @@ export async function POST(
     // 2. ПОИСК ПОЛЬЗОВАТЕЛЯ В БАЗЕ ДАННЫХ
     const user = usersDb.getUserByUsername(usernameClean);
 
-    // БЕЗОПАСНОСТЬ: Если пользователь не найден, мы не пишем "Пользователь не найден".
-    // Вместо этого отдаем общую ошибку, чтобы хакеры не могли перебирать существующие логины (User Enumeration).
     if (!user) {
       return apiError('Неверное имя пользователя или пароль', 401);
     }
 
     // 3. ПРОВЕРКА ЗАХЕШИРОВАННОГО ПАРОЛЯ
-    // Метод verifyPassword сам внутри применит crypto.createHash('sha256') к введенной строке
     const isPasswordValid = usersDb.verifyPassword(user.id, passwordClean);
 
     if (!isPasswordValid) {
       return apiError('Неверное имя пользователя или пароль', 401);
     }
 
-    // 4. ГЕНЕРАЦИЯ СЕССИОННОГО ТОКЕНА
-    const mockJwtToken = btoa(
-      JSON.stringify({ userId: user.id, role: 'user' }),
-    );
+    // 4. ИСПРАВЛЕНО: ГЕНЕРАЦИЯ СЕССИОННОГО ТОКЕНА ЧЕРЕЗ ФУНКЦИЮ
+    // Передаем только нужный payload, утилита сама упакует его в Base64 с префиксом 🛡️
+    const fullTokenString = generateToken({
+      userId: user.id,
+      username: user.username,
+    });
 
     console.log(
       `[AUTH] Успешный вход в систему. ID: ${user.id}, Login: ${user.username}`,
     );
 
-    // 5. ОТВЕТ УСПЕХА: Возвращаем данные профиля и токен
+    // Подготавливаем чистый объект профиля
+    const userData = {
+      id: user.id,
+      username: user.username,
+      createdAt: user.createdAt,
+    };
+
+    // ==========================================
+    // 💾 БЕЗОПАСНАЯ ЗАПИСЬ ЧЕРЕЗ ХЕЛПЕР
+    // ==========================================
+    await serverCookies.setToken(fullTokenString);
+
     return apiSuccess(
       {
-        user: {
-          id: user.id,
-          username: user.username,
-          createdAt: user.createdAt,
-        },
-        token: `mock_jwt_${mockJwtToken}`,
+        user: userData,
+        token: fullTokenString,
       },
       200,
     );

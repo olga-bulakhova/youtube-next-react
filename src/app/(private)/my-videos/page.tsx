@@ -1,11 +1,15 @@
 import { db } from '@/app/api/videos/_storage/videosStorage';
 import { VideosListScreen } from '@/screen/VideoListScreen';
-import { requireServerAuth } from '@/shared/server';
+import {
+  AuthenticatedPageProps,
+  withServerAuth,
+} from '@/shared/hoc/withServerAuth/withServerAuth';
 
 export const dynamic = 'force-dynamic';
 
-export default async function MyVideosPage() {
-  const { userId } = await requireServerAuth();
+function MyVideosPage({ user }: AuthenticatedPageProps) {
+  const { userId } = user;
+
   const videos = db.getVideosByUserId(userId);
   const activeCategoriesKeys = db.getActiveCategoriesByUserId(userId);
 
@@ -18,3 +22,5 @@ export default async function MyVideosPage() {
     />
   );
 }
+
+export default withServerAuth(MyVideosPage);

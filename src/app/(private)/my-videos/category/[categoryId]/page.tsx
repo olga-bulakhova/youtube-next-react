@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound } from 'next/navigation'; // Нативный 404 прерыватель Next.js [0.3]
 import { VideosListScreen } from '@/screen/VideoListScreen';
 import { db } from '@/app/api/videos/_storage/videosStorage';
 import { CATEGORIES } from '@/shared/constants';
-import { requireServerAuth } from '@/shared/server';
-
+import {
+  AuthenticatedPageProps,
+  withServerAuth,
+} from '@/shared/hoc/withServerAuth/withServerAuth';
 
 type MyVideosCategoryPageProps = {
   params: Promise<{ categoryId: string }>;
@@ -23,13 +25,15 @@ export async function generateMetadata({
   };
 }
 
-export default async function MyVideosCategoryPage({
+async function MyVideosCategoryPage({
   params,
-}: MyVideosCategoryPageProps) {
+  user,
+}: MyVideosCategoryPageProps & AuthenticatedPageProps) {
   const { categoryId } = await params;
-  const isCategoryValid = CATEGORIES.some((item) => item.value === categoryId);
 
-  const { userId } = await requireServerAuth();
+  const { userId } = user;
+
+  const isCategoryValid = CATEGORIES.some((item) => item.value === categoryId);
 
   if (!isCategoryValid) {
     notFound();
@@ -44,6 +48,9 @@ export default async function MyVideosCategoryPage({
       category={categoryId}
       basePath="/my-videos"
       activeCategoriesKeys={activeCategoriesKeys}
+      userId={userId}
     />
   );
 }
+
+export default withServerAuth(MyVideosCategoryPage);

@@ -1,4 +1,4 @@
-import React, { forwardRef, SelectHTMLAttributes } from 'react';
+import { forwardRef, SelectHTMLAttributes } from 'react';
 
 interface SelectOption {
   value: string;
@@ -25,10 +25,11 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
         <select
           id={id}
           ref={ref}
-          className={`cursor-pointer rounded-lg border bg-zinc-900 p-2 text-white focus:ring-2 focus:outline-none ${
+          // 🟢 ИСПРАВЛЕНО: Заменили focus:ring-blue-500/50 на focus:ring-emerald-500/50, добавили focus:border-emerald-500 и transition-all для плавности
+          className={`cursor-pointer rounded-lg border bg-zinc-900 p-2 text-white transition-all focus:ring-2 focus:outline-none ${
             error
               ? 'border-red-500 focus:ring-red-500/50'
-              : 'border-zinc-700 focus:ring-blue-500/50'
+              : 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50'
           } ${className}`}
           {...props}
         >

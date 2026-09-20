@@ -1,0 +1,46 @@
+interface TokenPayload {
+  userId: number;
+  username: string; // Оставляем только критически важные данные профиля
+}
+
+const TOKEN_PREFIX = 'mock_jwt_';
+
+/**
+ * Безопасно генерирует mock-JWT токен на сервере (кодирует данные в Base64) [0.2]
+ */
+export const generateToken = (payload: TokenPayload): string => {
+  try {
+    const jsonString = JSON.stringify(payload);
+    const base64Hash = btoa(jsonString); // Переводим JSON-строку в Base64 хэш [0.2]
+
+    return `${TOKEN_PREFIX}${base64Hash}`;
+  } catch (error) {
+    console.error('Ошибка при генерации токена авторизации:', error);
+    throw new Error('Не удалось сгенерировать сессионный токен');
+  }
+};
+
+/**
+ * Безопасно расшифровывает ваш mock-JWT токен и возвращает данные (userId, username)
+ */
+export const getUserDataFromToken = (
+  fullTokenString: string | undefined,
+): TokenPayload | null => {
+  if (!fullTokenString || !fullTokenString.startsWith(TOKEN_PREFIX)) {
+    return null;
+  }
+
+  try {
+    // 1. Отрезаем префикс, чтобы оставить чистый Base64 хэш
+    const base64Part = fullTokenString.replace(TOKEN_PREFIX, '');
+
+    // 2. Расшифровываем Base64 обратно в JSON-строку [0.2]
+    const jsonString = atob(base64Part);
+
+    // 3. Превращаем строку в типизированный объект
+    return JSON.parse(jsonString) as TokenPayload;
+  } catch (error) {
+    console.error('Ошибка расшифровки токена авторизации:', error);
+    return null;
+  }
+};

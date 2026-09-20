@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { FormButton, FormInput } from '@/shared/ui/form-controls';
@@ -42,9 +40,10 @@ export const LoginScreen = () => {
           />
 
           <div className="mt-6 flex items-center justify-between gap-4">
+            {/* 🟢 ИСПРАВЛЕНО: Ссылка перекрашена из голубого в изумрудно-зеленый цвет */}
             <Link
               href="/auth/register"
-              className="text-sm font-medium text-blue-400 transition-colors hover:text-blue-300 hover:underline"
+              className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 hover:underline"
             >
               Создать аккаунт
             </Link>

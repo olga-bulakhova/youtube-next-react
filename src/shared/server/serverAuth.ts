@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { parseJsonCookie } from '../utils/cookies'; // Путь к вашему хелперу кук
-import { IUserCookie } from '@/app/api/auth/_storage/types'; // Путь к вашему интерфейсу
+import { getUserDataFromToken } from './token';
 
 interface AuthenticatedUser {
   userId: number;
@@ -10,16 +9,15 @@ interface AuthenticatedUser {
 
 export const requireServerAuth = async (): Promise<AuthenticatedUser> => {
   const cookieStore = await cookies();
-  const userCookie = cookieStore.get('user');
+  const tokenCookie = cookieStore.get('token');
+  const tokenData = getUserDataFromToken(tokenCookie?.value);
 
-  const user = parseJsonCookie<IUserCookie>(userCookie?.value);
-
-  if (!user || !user.id || !user.username) {
+  if (!tokenData || !tokenData.userId || !tokenData.username) {
     redirect('/auth/login');
   }
 
   return {
-    userId: user.id,
-    username: user.username,
+    userId: tokenData.userId,
+    username: tokenData.username,
   };
 };

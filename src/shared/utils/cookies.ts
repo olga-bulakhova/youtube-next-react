@@ -47,13 +47,5 @@ export const parseJsonCookie = <T>(
   }
 };
 
-/**
- * Стирает авторизационные куки токена и профиля пользователя (Клиентский метод)
- */
-export const removeClientAuthCookies = (): void => {
-  if (typeof window === 'undefined') return;
 
-  // Выставляем max-age=0, чтобы браузер мгновенно удалил записи
-  document.cookie = 'token=; path=/; max-age=0; SameSite=Lax; Secure';
-  document.cookie = 'user=; path=/; max-age=0; SameSite=Lax; Secure';
-};
+
