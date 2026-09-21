@@ -8,7 +8,7 @@ import {
   getYouTubeVideoId,
   isYouTubeDomain,
   getErrorMessage,
-} from '@/shared/utils';
+} from '@/shared/utils-client';
 import { videosApi } from '@/shared/api/videos';
 
 const schema = z.object({

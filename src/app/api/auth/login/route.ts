@@ -6,8 +6,8 @@ import {
   AuthSuccessResponse,
 } from '../_storage/types';
 import { usersDb } from '../_storage/usersStorage';
-import { serverCookies } from '@/shared/server';
-import { generateToken } from '@/shared/server/token';
+import { serverCookies } from '@/shared/utils-server';
+import { generateToken } from '@/shared/utils-server/token';
 
 export const dynamic = 'force-dynamic';
 

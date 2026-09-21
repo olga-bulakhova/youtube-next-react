@@ -1,3 +1,3 @@
-export { requireServerAuth } from './serverAuth';
+export { requireServerAuth } from './checkServerAuth';
 export { serverCookies } from './cookies';
 export { generateToken, getUserDataFromToken } from './token';

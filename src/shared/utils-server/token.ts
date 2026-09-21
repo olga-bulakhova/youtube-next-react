@@ -1,9 +1,12 @@
+import { serverEnv } from "./serverEnv";
+
+
 interface TokenPayload {
   userId: number;
-  username: string; // Оставляем только критически важные данные профиля
+  username: string;
 }
 
-const TOKEN_PREFIX = 'mock_jwt_';
+const TOKEN_PREFIX = serverEnv.TOKEN_PREFIX;
 
 /**
  * Безопасно генерирует mock-JWT токен на сервере (кодирует данные в Base64) [0.2]

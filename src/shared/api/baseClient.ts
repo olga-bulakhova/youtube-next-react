@@ -1,5 +1,8 @@
+import { clientEnv } from '../utils-client';
+
 // Получаем базовый URL из переменной окружения .env
-export const BASE_URL = process.env.SERVER_API_URL || 'http://localhost:3000';
+export const BASE_URL =
+  clientEnv.NEXT_PUBLIC_SERVER_API_URL || 'http://localhost:3000';
 
 /**
  * 🛠 УНИВЕРСАЛЬНЫЙ ХЕЛПЕР: Автоматически собирает заголовки для запроса.

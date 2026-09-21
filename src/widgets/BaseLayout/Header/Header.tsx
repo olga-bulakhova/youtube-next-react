@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { MainLogo } from '@/shared/ui/MainLogo';
 import { SidebarToggle } from '../SidebarToggle';
 import { UserMenu } from './UserMenu/ui/UserMenu';
-import { serverCookies } from '@/shared/server';
+import { serverCookies } from '@/shared/utils-server';
 
 export const Header = async () => {
   const user = await serverCookies.getUser();

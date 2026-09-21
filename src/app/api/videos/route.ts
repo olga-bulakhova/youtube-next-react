@@ -9,7 +9,7 @@ import {
   PostRequestBody,
 } from './_storage/types';
 import { db } from './_storage/videosStorage';
-import { getUserDataFromToken } from '@/shared/server';
+import { getUserDataFromToken } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
 

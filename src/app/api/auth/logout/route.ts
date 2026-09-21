@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { serverCookies } from '@/shared/server/cookies'; // Путь к вашему серверному файлу кук
+import { serverCookies } from '@/shared/utils-server/cookies';
 import { apiSuccess, apiError } from '../../_utils';
 
 export const dynamic = 'force-dynamic';

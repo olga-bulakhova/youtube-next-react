@@ -1,7 +1,7 @@
 import { Header } from './Header';
 import { SidebarProvider } from './SidebarContext';
 import { LayoutContent } from './LayoutContent';
-import { serverCookies } from '@/shared/server/cookies'; // 1. Импортируем наш серверный хелпер кук
+import { serverCookies } from '@/shared/utils-server/cookies'; // 1. Импортируем наш серверный хелпер кук
 
 type BaseLayoutProps = {
   children: React.ReactNode;

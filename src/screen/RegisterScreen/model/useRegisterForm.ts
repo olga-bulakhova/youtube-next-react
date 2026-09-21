@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/shared/api/auth';
-import { getErrorMessage } from '@/shared/utils';
+import { getErrorMessage } from '@/shared/utils-client';
 
 const schema = z
   .object({

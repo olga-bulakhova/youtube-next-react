@@ -1,4 +1,4 @@
-import { requireServerAuth } from '@/shared/server';
+import { requireServerAuth } from '@/shared/utils-server';
 import React from 'react';
 
 export interface AuthenticatedPageProps {

@@ -7,8 +7,8 @@ import {
   IUser,
 } from '../_storage/types';
 import { usersDb } from '../_storage/usersStorage';
-import { serverCookies } from '@/shared/server/cookies';
-import { generateToken } from '@/shared/server';
+import { serverCookies } from '@/shared/utils-server/cookies';
+import { generateToken } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
 
