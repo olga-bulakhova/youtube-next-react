@@ -30,7 +30,7 @@ export const VideosGrid = ({ videos }: VideosGridProps) => {
               className="relative block h-full w-full"
             >
               <Image
-                src={`https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg`}
+                src={`https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`}
                 alt={video.title}
                 unoptimized
                 fill

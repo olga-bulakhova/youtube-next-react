@@ -7,9 +7,37 @@ import {
   PostRequestBody,
 } from './_storage/types';
 import { db } from './_storage/videosStorage';
-import { serverCookies } from '@/shared/utils-server';
+import { checkYoutubeVideo, serverCookies } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * 🗺️ СЛОВАРЬ ОШИБОК И СИСТЕМНЫХ УВЕДОМЛЕНИЙ БЭКЕНДА ВИДЕО
+ */
+const VIDEO_ERROR_MESSAGES = {
+  VALIDATION: {
+    VIDEO_ID_REQUIRED: 'Идентификатор видео (videoId) обязателен',
+    CATEGORY_REQUIRED: 'Категория видео (category) обязательна',
+    INVALID_BODY_OR_SERVER: 'Невалидный JSON в теле запроса или ошибка сервера',
+  },
+  AUTH: {
+    UNAUTHORIZED: 'Действие запрещено. Пожалуйста, авторизуйтесь в системе.',
+  },
+  DB: {
+    ALREADY_EXISTS: 'Это видео уже добавлено',
+  },
+  YOUTUBE_API: {
+    NOT_FOUND:
+      'Видео не найдено на серверах YouTube. Возможно, оно удалено или является приватным.',
+    EMBED_DISABLED:
+      'Автор этого ролика запретил его воспроизведение на сторонних сайтах.',
+    AGE_RESTRICTED:
+      'Это видео содержит возрастные ограничения (18+). Доступно только на YouTube.',
+    OEMBED_FAILED: 'Не удалось получить метаданные видео с YouTube.',
+    NOT_FOUND_OEMBED: 'Видео не найдено на YouTube',
+    UNKNOWN_CHECK_ERROR: 'Не удалось проверить видео через YouTube API.',
+  },
+} as const;
 
 export async function GET(): Promise<NextResponse<ApiSuccessResponse>> {
   return apiSuccess({ videos: db.getAllVideos() });
@@ -21,45 +49,66 @@ export async function POST(
   try {
     const body = (await request.json()) as PostRequestBody;
 
+    // 1. Валидация входных параметров
     if (!body || !body.videoId || typeof body.videoId !== 'string') {
-      return apiError('Идентификатор видео (videoId) обязателен');
+      return apiError(VIDEO_ERROR_MESSAGES.VALIDATION.VIDEO_ID_REQUIRED);
     }
 
     if (!body.category || typeof body.category !== 'string') {
-      return apiError('Категория видео (category) обязательна');
+      return apiError(VIDEO_ERROR_MESSAGES.VALIDATION.CATEGORY_REQUIRED);
     }
 
     const { videoId, category } = body;
 
+    // 2. Проверка сессии пользователя
     const user = await serverCookies.getUser();
 
     if (!user || !user.id) {
-      return apiError(
-        'Действие запрещено. Пожалуйста, авторизуйтесь в системе.',
-        401,
-      );
+      return apiError(VIDEO_ERROR_MESSAGES.AUTH.UNAUTHORIZED, 401);
     }
 
     const currentUserId = user.id;
 
+    // 3. Проверка на дубликат в локальной базе данных
     if (db.hasVideo(videoId)) {
-      return apiError('Это видео уже добавлено');
+      return apiError(VIDEO_ERROR_MESSAGES.DB.ALREADY_EXISTS);
     }
 
+    // 4. Проверка ограничений через официальную шину Google API
+    const checkResult = await checkYoutubeVideo(videoId);
+
+    if (!checkResult.allowed) {
+      if (checkResult.reason === 'NOT_FOUND') {
+        return apiError(VIDEO_ERROR_MESSAGES.YOUTUBE_API.NOT_FOUND, 400);
+      }
+      if (checkResult.reason === 'EMBED_DISABLED') {
+        return apiError(VIDEO_ERROR_MESSAGES.YOUTUBE_API.EMBED_DISABLED, 400);
+      }
+      if (checkResult.reason === 'AGE_RESTRICTED') {
+        return apiError(VIDEO_ERROR_MESSAGES.YOUTUBE_API.AGE_RESTRICTED, 400);
+      }
+      return apiError(
+        VIDEO_ERROR_MESSAGES.YOUTUBE_API.UNKNOWN_CHECK_ERROR,
+        400,
+      );
+    }
+
+    // 5. Запрос официальных метаданных для формирования карточки плеера
     const rawResult = await fetch(
       `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
     );
 
     if (!rawResult.ok) {
-      return apiError('Не удалось получить информацию о видео с YouTube');
+      return apiError(VIDEO_ERROR_MESSAGES.YOUTUBE_API.OEMBED_FAILED, 400);
     }
 
     const videoInfo = await rawResult.json();
 
     if (!videoInfo || !videoInfo.title) {
-      return apiError('Видео не найдено на YouTube');
+      return apiError(VIDEO_ERROR_MESSAGES.YOUTUBE_API.NOT_FOUND_OEMBED);
     }
 
+    // Формируем модель данных и сохраняем её
     const newVideo: IVideoItem = {
       videoId,
       title: videoInfo.title,
@@ -73,6 +122,9 @@ export async function POST(
 
     return apiSuccess({ videos: db.getAllVideos() }, 201);
   } catch (error) {
-    return apiError('Невалидный JSON в теле запроса или ошибка сервера');
+    return apiError(
+      VIDEO_ERROR_MESSAGES.VALIDATION.INVALID_BODY_OR_SERVER,
+      500,
+    );
   }
 }

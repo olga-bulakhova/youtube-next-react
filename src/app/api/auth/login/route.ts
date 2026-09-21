@@ -11,43 +11,47 @@ import { generateToken } from '@/shared/utils-server/token';
 
 export const dynamic = 'force-dynamic';
 
+const LOGIN_ERROR_MESSAGES = {
+  VALIDATION: {
+    USERNAME_REQUIRED: 'Имя пользователя (username) обязательно для заполнения',
+    PASSWORD_REQUIRED: 'Пароль (password) обязателен для заполнения',
+    INVALID_JSON_OR_SERVER:
+      'Невалидный JSON в теле запроса или внутренняя ошибка сервера',
+  },
+  AUTH: {
+    INVALID_CREDENTIALS: 'Неверное имя пользователя или пароль',
+  },
+} as const;
+
 export async function POST(
   request: Request,
 ): Promise<NextResponse<AuthSuccessResponse | ApiErrorResponse>> {
   try {
     const body = (await request.json()) as AuthRequestBody;
 
-    // 1. ВАЛИДАЦИЯ СТРУКТУРЫ ЗАПРОСА
     if (!body || !body.username || typeof body.username !== 'string') {
-      return apiError(
-        'Имя пользователя (username) обязательно для заполнения',
-        400,
-      );
+      return apiError(LOGIN_ERROR_MESSAGES.VALIDATION.USERNAME_REQUIRED, 400);
     }
 
     if (!body.password || typeof body.password !== 'string') {
-      return apiError('Пароль (password) обязателен для заполнения', 400);
+      return apiError(LOGIN_ERROR_MESSAGES.VALIDATION.PASSWORD_REQUIRED, 400);
     }
 
     const usernameClean = body.username.trim();
     const passwordClean = body.password.trim();
 
-    // 2. ПОИСК ПОЛЬЗОВАТЕЛЯ В БАЗЕ ДАННЫХ
     const user = usersDb.getUserByUsername(usernameClean);
 
     if (!user) {
-      return apiError('Неверное имя пользователя или пароль', 401);
+      return apiError(LOGIN_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 401);
     }
 
-    // 3. ПРОВЕРКА ЗАХЕШИРОВАННОГО ПАРОЛЯ
     const isPasswordValid = usersDb.verifyPassword(user.id, passwordClean);
 
     if (!isPasswordValid) {
-      return apiError('Неверное имя пользователя или пароль', 401);
+      return apiError(LOGIN_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 401);
     }
 
-    // 4. ИСПРАВЛЕНО: ГЕНЕРАЦИЯ СЕССИОННОГО ТОКЕНА ЧЕРЕЗ ФУНКЦИЮ
-    // Передаем только нужный payload, утилита сама упакует его в Base64 с префиксом 🛡️
     const fullTokenString = generateToken({
       userId: user.id,
       username: user.username,
@@ -57,16 +61,12 @@ export async function POST(
       `[AUTH] Успешный вход в систему. ID: ${user.id}, Login: ${user.username}`,
     );
 
-    // Подготавливаем чистый объект профиля
     const userData = {
       id: user.id,
       username: user.username,
       createdAt: user.createdAt,
     };
 
-    // ==========================================
-    // 💾 БЕЗОПАСНАЯ ЗАПИСЬ ЧЕРЕЗ ХЕЛПЕР
-    // ==========================================
     await serverCookies.setToken(fullTokenString);
 
     return apiSuccess(
@@ -78,7 +78,7 @@ export async function POST(
     );
   } catch (error) {
     return apiError(
-      'Невалидный JSON в теле запроса или внутренняя ошибка сервера',
+      LOGIN_ERROR_MESSAGES.VALIDATION.INVALID_JSON_OR_SERVER,
       400,
     );
   }

@@ -12,22 +12,41 @@ import { generateToken } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * 🗺️ СЛОВАРЬ ОШИБОК И СИСТЕМНЫХ УВЕДОМЛЕНИЙ ДЛЯ РЕГИСТРАЦИИ
+ */
+const REGISTER_ERROR_MESSAGES = {
+  VALIDATION: {
+    USERNAME_REQUIRED: 'Имя пользователя (username) обязательно для заполнения',
+    PASSWORD_REQUIRED: 'Пароль (password) обязателен для заполнения',
+    USERNAME_TOO_SHORT: 'Имя пользователя должно содержать минимум 3 символа',
+    PASSWORD_TOO_SHORT: 'Пароль должен содержать минимум 6 символов',
+    INVALID_JSON_OR_SERVER:
+      'Невалидный JSON в теле запроса или критическая ошибка сервера',
+  },
+  BUSINESS_LOGIC: {
+    USERNAME_TAKEN: 'Пользователь с таким именем уже зарегистрирован',
+  },
+} as const;
+
 export async function POST(
   request: Request,
 ): Promise<NextResponse<AuthSuccessResponse | ApiErrorResponse>> {
   try {
     const body = (await request.json()) as AuthRequestBody;
 
-    // Валидация структуры запроса
     if (!body || !body.username || typeof body.username !== 'string') {
       return apiError(
-        'Имя пользователя (username) обязательно для заполнения',
+        REGISTER_ERROR_MESSAGES.VALIDATION.USERNAME_REQUIRED,
         400,
       );
     }
 
     if (!body.password || typeof body.password !== 'string') {
-      return apiError('Пароль (password) обязателен для заполнения', 400);
+      return apiError(
+        REGISTER_ERROR_MESSAGES.VALIDATION.PASSWORD_REQUIRED,
+        400,
+      );
     }
 
     const usernameClean = body.username.trim();
@@ -35,21 +54,25 @@ export async function POST(
 
     if (usernameClean.length < 3) {
       return apiError(
-        'Имя пользователя должно содержать минимум 3 символа',
+        REGISTER_ERROR_MESSAGES.VALIDATION.USERNAME_TOO_SHORT,
         400,
       );
     }
 
     if (passwordClean.length < 6) {
-      return apiError('Пароль должен содержать минимум 6 символов', 400);
+      return apiError(
+        REGISTER_ERROR_MESSAGES.VALIDATION.PASSWORD_TOO_SHORT,
+        400,
+      );
     }
 
-    // Проверка уникальности логина
     if (usersDb.isUsernameTaken(usernameClean)) {
-      return apiError('Пользователь с таким именем уже зарегистрирован', 400);
+      return apiError(
+        REGISTER_ERROR_MESSAGES.BUSINESS_LOGIC.USERNAME_TAKEN,
+        400,
+      );
     }
 
-    // Генерация автоинкрементного ID
     const newUserId = usersDb.getNextId();
 
     const newUser: IUser = {
@@ -58,10 +81,8 @@ export async function POST(
       createdAt: new Date().toISOString(),
     };
 
-    // Запись профиля и хэширование пароля в памяти сервера
     usersDb.addUser(newUser, passwordClean);
 
-    // Генерация токена сессии
     const fullTokenString = generateToken({
       userId: newUser.id,
       username: newUser.username,
@@ -71,17 +92,14 @@ export async function POST(
       `[AUTH] Новая регистрация и автологин. ID: ${newUserId}, Login: ${usernameClean}`,
     );
 
-    // Подготавливаем чистый объект профиля для записи и ответа
     const userData = {
       id: newUser.id,
       username: newUser.username,
       createdAt: newUser.createdAt,
     };
 
-    // Хелпер сам применит HttpOnly для токена и Lax политики для безопасности 🛡️
     await serverCookies.setToken(fullTokenString);
 
-    // Возвращаем структуру AuthSuccessResponse
     return apiSuccess(
       {
         user: userData,
@@ -91,7 +109,7 @@ export async function POST(
     );
   } catch (error) {
     return apiError(
-      'Невалидный JSON в теле запроса или критическая ошибка сервера',
+      REGISTER_ERROR_MESSAGES.VALIDATION.INVALID_JSON_OR_SERVER,
       400,
     );
   }

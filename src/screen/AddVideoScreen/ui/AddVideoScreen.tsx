@@ -12,9 +12,9 @@ export const AddVideoScreen = () => {
     <FormCard
       title="Добавить новое видео"
       subtitle="Вставьте ссылку с YouTube и выберите подходящий раздел"
-      maxWidthClassName="max-w-xl" // 🌟 Задаем увеличенную ширину карточки
+      maxWidthClassName="max-w-xl"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <FormInput
           id="videoUrl"
           label="Ссылка на видео"
@@ -26,13 +26,13 @@ export const AddVideoScreen = () => {
         <FormSelect
           id="category"
           label="Категория видео"
-          placeholder="Выберите категорию..."
+          placeholder="Выберите категория..."
           options={CATEGORIES}
           error={form.errors.category?.message}
           {...form.register('category')}
         />
 
-        <div className="mt-4">
+        <div className="mt-2">
           <FormButton
             isLoading={form.isSubmitting}
             loadingText="Добавление..."

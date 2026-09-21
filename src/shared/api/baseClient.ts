@@ -1,49 +1,32 @@
 import { clientEnv } from '../utils-client';
 
-// Получаем базовый URL из переменной окружения .env
-export const BASE_URL =
-  clientEnv.NEXT_PUBLIC_SERVER_API_URL || 'http://localhost:3000';
+const BASE_URL = clientEnv.NEXT_PUBLIC_SERVER_API_URL || '';
 
-/**
- * 🛠 УНИВЕРСАЛЬНЫЙ ХЕЛПЕР: Автоматически собирает заголовки для запроса.
- * Если передано тело (body), по умолчанию добавляет заголовок JSON.
- */
 export const createHeaders = (
   customHeaders?: HeadersInit,
   hasBody = false,
 ): HeadersInit => {
   const baseHeaders: Record<string, string> = {};
-
   if (hasBody) {
     baseHeaders['Content-Type'] = 'application/json';
   }
-
-  return {
-    ...baseHeaders,
-    ...customHeaders,
-  };
+  return { ...baseHeaders, ...customHeaders };
 };
 
-/**
- * 🛠 УНИВЕРСАЛЬНЫЙ ХЕЛПЕР: Централизованно обрабатывает ответы от бэкенда.
- */
 export async function handleResponse<T>(response: Response): Promise<T> {
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || `Ошибка сервера: ${response.status}`);
   }
-
   return data as T;
 }
 
-/**
- * 🚀 ЕДИНЫЙ КЛИЕНТ ЗАПРОСОВ: Обертка над нативным fetch для сокращения кода
- */
 export const apiFetch = async <T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> => {
+  // В браузере BASE_URL будет '', и путь останется относительным '/api/...'
+  // На сервере (если заполнено в .env) подставится полный домен 'http://localhost:3000/api/...'
   const url = `${BASE_URL}${endpoint}`;
   const hasBody = !!options.body;
 

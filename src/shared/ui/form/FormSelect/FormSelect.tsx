@@ -44,7 +44,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
           ))}
         </select>
         {error && (
-          <p className="absolute bottom-0 left-0 text-xs text-red-500">
+          <p className="absolute top-17.5 left-0 text-xs text-red-500">
             {error}
           </p>
         )}

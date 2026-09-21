@@ -20,7 +20,7 @@ export const FormCard = ({
       className={`flex flex-col items-center justify-center py-6 ${className}`}
     >
       <div
-        className={`w-full ${maxWidthClassName} rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 shadow-xl backdrop-blur-sm`}
+        className={`w-full ${maxWidthClassName} rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 shadow-xl backdrop-blur-sm md:p-8`}
       >
         <div className="mb-6 text-center">
           <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
