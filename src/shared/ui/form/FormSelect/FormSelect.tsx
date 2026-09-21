@@ -25,8 +25,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
         <select
           id={id}
           ref={ref}
-          // 🟢 ИСПРАВЛЕНО: Заменили focus:ring-blue-500/50 на focus:ring-emerald-500/50, добавили focus:border-emerald-500 и transition-all для плавности
-          className={`cursor-pointer rounded-lg border bg-zinc-900 p-2 text-white transition-all focus:ring-2 focus:outline-none ${
+          className={`cursor-pointer rounded-lg border bg-zinc-900 p-2 pr-10 text-white transition-all focus:ring-2 focus:outline-none ${
             error
               ? 'border-red-500 focus:ring-red-500/50'
               : 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50'

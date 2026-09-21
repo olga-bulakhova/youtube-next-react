@@ -3,17 +3,18 @@
 import { YouTubePlayer } from '@/shared/ui/YouTubePlayer';
 import { useAddVideoForm } from '../model/useAddVideoForm';
 import { CATEGORIES } from '@/shared/constants';
-import { FormInput, FormSelect, FormButton } from '@/shared/ui/form-controls';
+import { FormInput, FormSelect, FormButton, FormCard } from '@/shared/ui/form';
 
 export const AddVideoScreen = () => {
   const { videoId, onSubmit, handleSubmit, ...form } = useAddVideoForm();
 
   return (
-    <div className="mx-auto max-w-lg px-4 pt-8 md:min-w-xl">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="mb-6 flex flex-col gap-4"
-      >
+    <FormCard
+      title="Добавить новое видео"
+      subtitle="Вставьте ссылку с YouTube и выберите подходящий раздел"
+      maxWidthClassName="max-w-xl" // 🌟 Задаем увеличенную ширину карточки
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
         <FormInput
           id="videoUrl"
           label="Ссылка на видео"
@@ -31,12 +32,25 @@ export const AddVideoScreen = () => {
           {...form.register('category')}
         />
 
-        <FormButton isLoading={form.isSubmitting} loadingText="Добавление...">
-          Добавить видео
-        </FormButton>
+        <div className="mt-4">
+          <FormButton
+            isLoading={form.isSubmitting}
+            loadingText="Добавление..."
+            className="w-full"
+          >
+            Добавить видео
+          </FormButton>
+        </div>
       </form>
 
-      <YouTubePlayer videoId={videoId} />
-    </div>
+      {videoId && (
+        <div className="animate-in fade-in mt-6 border-t border-zinc-800/80 pt-6 duration-300">
+          <p className="mb-3 text-center text-xs font-medium text-emerald-400">
+            🎉 Видео успешно распознано и готово к просмотру!
+          </p>
+          <YouTubePlayer videoId={videoId} />
+        </div>
+      )}
+    </FormCard>
   );
 };

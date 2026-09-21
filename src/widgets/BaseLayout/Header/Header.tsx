@@ -4,6 +4,7 @@ import { SidebarToggle } from '../SidebarToggle';
 import { UserMenu } from './UserMenu/ui/UserMenu';
 import { serverCookies } from '@/shared/utils-server';
 import { APP_ROUTES } from '@/shared/constants';
+import { ProfileIcon } from '@/shared/icons';
 
 export const Header = async () => {
   const user = await serverCookies.getUser();
@@ -33,9 +34,10 @@ export const Header = async () => {
         ) : (
           <Link
             href={APP_ROUTES.AUTH.LOGIN}
-            className="flex h-9 items-center gap-2 rounded-full bg-white/10 px-4 transition-colors hover:bg-white/15"
+            className="group flex h-9 items-center gap-2 rounded-full bg-white/10 px-5 transition-colors hover:bg-white/15"
           >
-            <span>Войти</span>
+            <ProfileIcon className="h-5 w-5 opacity-70 transition-opacity duration-200 group-hover:opacity-100" />
+            <span className="text-sm font-medium">Войти</span>
           </Link>
         )}
       </div>

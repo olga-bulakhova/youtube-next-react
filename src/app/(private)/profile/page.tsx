@@ -8,12 +8,11 @@ export const metadata: Metadata = {
   title: 'Настройки профиля',
 };
 
-// 🌟 ИСПРАВЛЕНО: Страница теперь строго статическая. Никаких параметров из URL!
 function ProfilePage({ user }: AuthenticatedPageProps) {
   const { username, userId } = user;
 
   return (
-    <div className="max-w-2xl p-6">
+    <div className="mx-auto max-w-2xl p-4">
       <div className="mb-6 border-b border-zinc-800 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
           Настройки аккаунта
