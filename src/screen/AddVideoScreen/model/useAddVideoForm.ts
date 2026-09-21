@@ -4,7 +4,12 @@ import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { getYouTubeVideoId, isYouTubeDomain } from '@/shared/utils';
+import {
+  getYouTubeVideoId,
+  isYouTubeDomain,
+  getErrorMessage,
+} from '@/shared/utils';
+import { videosApi } from '@/shared/api/videos';
 
 const schema = z.object({
   videoUrl: z
@@ -41,28 +46,22 @@ export const useAddVideoForm = () => {
     if (!currentVideoId) return;
 
     try {
-      const res = await fetch('/api/videos', {
-        method: 'POST',
-        body: JSON.stringify({ videoId: currentVideoId, category}),
-        headers: { 'Content-Type': 'application/json' },
+      await videosApi.add({
+        videoId: currentVideoId,
+        category,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError('videoUrl', {
-          type: 'server',
-          message: data.error || 'Произошла ошибка при добавлении видео',
-        });
-        return;
-      }
 
       setVideoId(currentVideoId);
       reset();
     } catch (error) {
+      const message = getErrorMessage(
+        error,
+        'Не удалось связаться с сервером. Попробуйте позже.',
+      );
+
       setError('videoUrl', {
         type: 'server',
-        message: 'Не удалось связаться с сервером. Попробуйте позже.',
+        message,
       });
     }
   };

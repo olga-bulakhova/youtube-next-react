@@ -15,11 +15,10 @@ export const UserMenu = ({
   username,
   profileId,
 }: UserMenuProps) => {
-  const { isOpen, toggleMenu, closeMenu, handleLogout } = useUserMenu();
+  const { isOpen, toggleMenu, closeMenu, onLogoutClick } = useUserMenu();
 
   return (
     <div className="relative">
-      {/* КРУГЛЫЙ АВАТАР */}
       <button
         onClick={toggleMenu}
         title={`Меню пользователя ${username}`}
@@ -28,7 +27,6 @@ export const UserMenu = ({
         <span className="text-sm select-none">{firstLetter}</span>
       </button>
 
-      {/* БЭКДРОП-НЕВИДИМКА */}
       {isOpen && (
         <div
           onClick={closeMenu}
@@ -36,7 +34,6 @@ export const UserMenu = ({
         />
       )}
 
-      {/* ВЫПАДАЮЩИЙ СПИСОК */}
       {isOpen && (
         <div className="animate-in fade-in slide-in-from-top-1 absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-xl border border-zinc-800 bg-zinc-900 p-1.5 shadow-2xl duration-100">
           <div className="mb-1 border-b border-zinc-800 px-3 py-2">
@@ -57,7 +54,7 @@ export const UserMenu = ({
             </Link>
 
             <button
-              onClick={handleLogout}
+              onClick={onLogoutClick}
               className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none"
             >
               <LogoutIcon />

@@ -4,6 +4,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import { authApi } from '@/shared/api/auth';
+import { getErrorMessage } from '@/shared/utils';
 
 const schema = z.object({
   username: z
@@ -35,38 +37,17 @@ export const useLoginForm = () => {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (formData) => {
-    const payload = {
-      username: formData.username.trim(),
-      password: formData.password.trim(),
-    };
-
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' },
+      await authApi.login({
+        username: formData.username.trim(),
+        password: formData.password.trim(),
       });
-
-      const data = await res.json();
-
-      console.log(data);
-
-      if (!res.ok) {
-        setError('username', {
-          type: 'server',
-          message: data.error || 'Произошла ошибка при входе в систему',
-        });
-        return;
-      }
-
-      console.log('[AUTH] Успешный рантайм входа. Получен токен:', data.token);
-
       router.replace('/');
-      // router.refresh(); // Обновляем серверные компоненты лэйаута, чтобы обновить состояние хедера
     } catch (error) {
+      const message = getErrorMessage(error, 'Не удалось войти в систему');
       setError('username', {
         type: 'server',
-        message: 'Не удалось связаться с сервером. Попробуйте позже.',
+        message: message,
       });
     }
   };

@@ -4,6 +4,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import { authApi } from '@/shared/api/auth';
+import { getErrorMessage } from '@/shared/utils';
 
 const schema = z
   .object({
@@ -42,37 +44,22 @@ export const useRegisterForm = () => {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (formData) => {
-    const payload = {
-      username: formData.username.trim(),
-      password: formData.password.trim(),
-    };
-
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' },
+      await authApi.register({
+        username: formData.username.trim(),
+        password: formData.password.trim(),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError('username', {
-          type: 'server',
-          message: data.error || 'Ошибка при регистрации',
-        });
-        return;
-      }
-
-      console.log(
-        '[AUTH] Успешная регистрация. Данные сессии сохранены в cookies',
+      router.replace('/');
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        'Не удалось связаться с сервером. Попробуйте позже.',
       );
 
-      router.replace('/');
-    } catch (_) {
       setError('username', {
         type: 'server',
-        message: 'Не удалось связаться с сервером. Попробуйте позже.',
+        message,
       });
     }
   };
