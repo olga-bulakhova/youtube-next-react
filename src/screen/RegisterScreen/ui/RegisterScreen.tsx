@@ -3,6 +3,7 @@
 import { FormButton, FormInput } from '@/shared/ui/form-controls';
 import Link from 'next/link';
 import { useRegisterForm } from '../model/useRegisterForm';
+import { APP_ROUTES } from '@/shared/constants';
 
 export const RegisterScreen = () => {
   const { onSubmit, handleSubmit, ...form } = useRegisterForm();
@@ -51,7 +52,7 @@ export const RegisterScreen = () => {
 
           <div className="mt-6 flex items-center justify-between gap-4">
             <Link
-              href="/auth/login"
+              href={APP_ROUTES.AUTH.LOGIN}
               className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 hover:underline"
             >
               Уже есть аккаунт?

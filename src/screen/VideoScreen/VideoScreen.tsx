@@ -1,4 +1,4 @@
-import { IVideoItem } from '@/app/api/_utils';
+import { IVideoItem } from '@/app/api/videos/_storage/types';
 import { YouTubePlayer } from '@/shared/ui/YouTubePlayer';
 import Link from 'next/link';
 

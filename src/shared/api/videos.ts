@@ -1,5 +1,6 @@
 import { ApiSuccessResponse } from '@/app/api/videos/_storage/types';
 import { apiFetch } from './baseClient'; // Импортируем нашу общую утилиту
+import { API_ROUTES } from '../constants';
 
 interface AddVideoPayload {
   videoId: string;
@@ -11,7 +12,7 @@ export const videosApi = {
    * Получить список всех видеороликов (GET)
    */
   getAll: async (): Promise<ApiSuccessResponse> => {
-    return apiFetch<ApiSuccessResponse>('/api/videos', {
+    return apiFetch<ApiSuccessResponse>(API_ROUTES.VIDEOS.BASE, {
       method: 'GET',
       next: { revalidate: 0 }, // Отключаем кэш в Next.js 16
     });
@@ -21,7 +22,7 @@ export const videosApi = {
    * Добавить новое видео в коллекцию (POST)
    */
   add: async (payload: AddVideoPayload): Promise<ApiSuccessResponse> => {
-    return apiFetch<ApiSuccessResponse>('/api/videos', {
+    return apiFetch<ApiSuccessResponse>(API_ROUTES.VIDEOS.BASE, {
       method: 'POST',
       body: JSON.stringify(payload), // Заголовки Content-Type подставятся автоматически! 🛡️
     });
@@ -31,7 +32,7 @@ export const videosApi = {
    * Удалить видео из коллекции (DELETE)
    */
   delete: async (videoId: string): Promise<ApiSuccessResponse> => {
-    return apiFetch<ApiSuccessResponse>('/api/videos', {
+    return apiFetch<ApiSuccessResponse>(API_ROUTES.VIDEOS.BASE, {
       method: 'DELETE',
       body: JSON.stringify({ videoId }),
     });

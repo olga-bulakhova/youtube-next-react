@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { apiError, apiSuccess } from '../_utils';
-
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
@@ -9,9 +7,13 @@ import {
   PostRequestBody,
 } from './_storage/types';
 import { db } from './_storage/videosStorage';
-import { getUserDataFromToken } from '@/shared/utils-server';
+import { serverCookies } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
+
+export async function GET(): Promise<NextResponse<ApiSuccessResponse>> {
+  return apiSuccess({ videos: db.getAllVideos() });
+}
 
 export async function POST(
   request: Request,
@@ -29,18 +31,16 @@ export async function POST(
 
     const { videoId, category } = body;
 
-    const cookieStore = await cookies();
-    const tokenCookie = cookieStore.get('token');
-    const tokenData = getUserDataFromToken(tokenCookie?.value);
+    const user = await serverCookies.getUser();
 
-    if (!tokenData || !tokenData.userId) {
+    if (!user || !user.id) {
       return apiError(
         'Действие запрещено. Пожалуйста, авторизуйтесь в системе.',
         401,
       );
     }
 
-    const currentUserId = tokenData.userId;
+    const currentUserId = user.id;
 
     if (db.hasVideo(videoId)) {
       return apiError('Это видео уже добавлено');

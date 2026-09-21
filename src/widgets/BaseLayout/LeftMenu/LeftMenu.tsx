@@ -1,14 +1,13 @@
 'use client';
 
 import { MenuLink } from './MenuLink';
-import HomeIcon from '@/shared/assets/icons/home.svg';
-import ProfileIcon from '@/shared/assets/icons/profile.svg';
-import AddIcon from '@/shared/assets/icons/add.svg';
-import VideoIcon from '@/shared/assets/icons/video.svg';
+import { AddIcon } from '@/shared/icons/AddIcon';
 import { useSidebar } from '../SidebarContext';
 import { MainLogo } from '@/shared/ui/MainLogo';
 import { IUserCookie } from '@/app/api/auth/_storage/types';
 import { SidebarToggle } from '../SidebarToggle';
+import { HomeIcon, ProfileIcon, VideoIcon } from '@/shared/icons';
+import { APP_ROUTES } from '@/shared/constants';
 
 type LeftMenuProps = {
   user: IUserCookie | null;
@@ -17,32 +16,19 @@ type LeftMenuProps = {
 export const LeftMenu = ({ user }: LeftMenuProps) => {
   const { closeSidebar } = useSidebar();
 
-  const profileId = user ? String(user.id) : null;
-
   const menuItems = [
-    { href: '/', icon: HomeIcon, alt: 'Home', label: 'Главная' },
-    ...(profileId
+    { href: APP_ROUTES.HOME, icon: HomeIcon, label: 'Главная' },
+    ...(user
       ? [
           {
-            href: `/profile/${profileId}`,
+            href: APP_ROUTES.PROFILE,
             icon: ProfileIcon,
-            alt: 'Profile',
             label: 'Профиль',
           },
         ]
       : []),
-    {
-      href: '/editor/add-video',
-      icon: AddIcon,
-      alt: 'Add',
-      label: 'Добавить видео',
-    },
-    {
-      href: '/my-videos',
-      icon: VideoIcon,
-      alt: 'Videos',
-      label: 'Ваши видео',
-    },
+    { href: APP_ROUTES.ADD_VIDEO, icon: AddIcon, label: 'Добавить видео' },
+    { href: APP_ROUTES.MY_VIDEOS, icon: VideoIcon, label: 'Ваши видео' },
   ];
 
   return (
@@ -58,7 +44,7 @@ export const LeftMenu = ({ user }: LeftMenuProps) => {
             key={item.href + item.label}
             href={item.href}
             icon={item.icon}
-            alt={item.alt}
+            alt={item.label}
           >
             {item.label}
           </MenuLink>

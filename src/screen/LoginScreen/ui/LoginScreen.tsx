@@ -3,6 +3,7 @@
 import { FormButton, FormInput } from '@/shared/ui/form-controls';
 import Link from 'next/link';
 import { useLoginForm } from '../model/useLoginForm';
+import { APP_ROUTES } from '@/shared/constants';
 
 export const LoginScreen = () => {
   const { onSubmit, handleSubmit, ...form } = useLoginForm();
@@ -40,9 +41,8 @@ export const LoginScreen = () => {
           />
 
           <div className="mt-6 flex items-center justify-between gap-4">
-            {/* 🟢 ИСПРАВЛЕНО: Ссылка перекрашена из голубого в изумрудно-зеленый цвет */}
             <Link
-              href="/auth/register"
+              href={APP_ROUTES.AUTH.REGISTER}
               className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 hover:underline"
             >
               Создать аккаунт

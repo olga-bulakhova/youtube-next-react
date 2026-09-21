@@ -2,10 +2,12 @@ import { cookies } from 'next/headers';
 import { IUserCookie } from '@/app/api/auth/_storage/types';
 import { getUserDataFromToken } from './token';
 
+const AUTH_COOKIE_NAME = 'x-auth-token';
+
 export const serverCookies = {
   setToken: async (token: string, days = 7): Promise<void> => {
     const cookieStore = await cookies();
-    cookieStore.set('token', token, {
+    cookieStore.set(AUTH_COOKIE_NAME, token, {
       path: '/',
       maxAge: days * 24 * 60 * 60,
       httpOnly: true,
@@ -16,7 +18,7 @@ export const serverCookies = {
 
   getUser: async (): Promise<IUserCookie | null> => {
     const cookieStore = await cookies();
-    const tokenCookie = cookieStore.get('token');
+    const tokenCookie = cookieStore.get(AUTH_COOKIE_NAME);
 
     if (!tokenCookie?.value) return null;
 
@@ -32,7 +34,6 @@ export const serverCookies = {
 
   clearAuth: async (): Promise<void> => {
     const cookieStore = await cookies();
-    cookieStore.delete('token');
-    cookieStore.delete('user');
+    cookieStore.delete(AUTH_COOKIE_NAME);
   },
 };

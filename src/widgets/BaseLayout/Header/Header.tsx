@@ -3,11 +3,11 @@ import { MainLogo } from '@/shared/ui/MainLogo';
 import { SidebarToggle } from '../SidebarToggle';
 import { UserMenu } from './UserMenu/ui/UserMenu';
 import { serverCookies } from '@/shared/utils-server';
+import { APP_ROUTES } from '@/shared/constants';
 
 export const Header = async () => {
   const user = await serverCookies.getUser();
   const username = user?.username || '';
-  const profileId = user ? String(user.id) : '';
   const firstLetter = username ? username.charAt(0).toUpperCase() : '';
 
   return (
@@ -21,22 +21,18 @@ export const Header = async () => {
         {username ? (
           <div className="flex items-center gap-4">
             <Link
-              href="/editor/add-video"
+              href={APP_ROUTES.ADD_VIDEO}
               className="flex h-9 items-center gap-2 rounded-full bg-white/10 px-4 transition-colors hover:bg-white/15"
             >
               <span className="mb-1 text-2xl leading-none font-light">+</span>
               <span>Добавить</span>
             </Link>
 
-            <UserMenu
-              firstLetter={firstLetter}
-              username={username}
-              profileId={profileId}
-            />
+            <UserMenu firstLetter={firstLetter} username={username} />
           </div>
         ) : (
           <Link
-            href="/auth/login"
+            href={APP_ROUTES.AUTH.LOGIN}
             className="flex h-9 items-center gap-2 rounded-full bg-white/10 px-4 transition-colors hover:bg-white/15"
           >
             <span>Войти</span>

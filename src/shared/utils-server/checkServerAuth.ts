@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getUserDataFromToken } from './token';
+import { serverCookies } from './cookies';
+import { APP_ROUTES } from '../constants';
 
 interface AuthenticatedUser {
   userId: number;
@@ -8,16 +8,14 @@ interface AuthenticatedUser {
 }
 
 export const requireServerAuth = async (): Promise<AuthenticatedUser> => {
-  const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get('token');
-  const tokenData = getUserDataFromToken(tokenCookie?.value);
+  const user = await serverCookies.getUser();
 
-  if (!tokenData || !tokenData.userId || !tokenData.username) {
-    redirect('/auth/login');
+  if (!user || !user.id || !user.username) {
+    redirect(APP_ROUTES.AUTH.LOGIN);
   }
 
   return {
-    userId: tokenData.userId,
-    username: tokenData.username,
+    userId: user.id,
+    username: user.username,
   };
 };

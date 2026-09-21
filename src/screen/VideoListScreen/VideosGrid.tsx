@@ -1,7 +1,7 @@
 import { IVideoItem } from '@/app/api/videos/_storage/types';
+import { APP_ROUTES } from '@/shared/constants';
 import Image from 'next/image';
 import Link from 'next/link';
-
 
 interface VideosGridProps {
   videos: IVideoItem[];
@@ -26,7 +26,7 @@ export const VideosGrid = ({ videos }: VideosGridProps) => {
         >
           <div className="relative aspect-video w-full overflow-hidden rounded-lg">
             <Link
-              href={`/video/${video.videoId}`}
+              href={APP_ROUTES.VIDEO(video.videoId)}
               className="relative block h-full w-full"
             >
               <Image
@@ -43,7 +43,7 @@ export const VideosGrid = ({ videos }: VideosGridProps) => {
 
           <div className="mt-3 flex flex-col gap-1">
             <Link
-              href={`/video/${video.videoId}`}
+              href={APP_ROUTES.VIDEO(video.videoId)}
               target="_blank"
               className="line-clamp-2 text-sm font-medium text-zinc-100 transition-colors"
             >

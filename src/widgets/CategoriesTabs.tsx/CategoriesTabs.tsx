@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CATEGORIES } from '@/shared/constants';
+import { APP_ROUTES } from '@/shared/constants/routes';
 
 interface CategoriesTabsProps {
   activeTab?: string;
@@ -18,13 +19,14 @@ export const CategoriesTabs = ({
   basePath = '',
   activeCategoriesKeys,
 }: CategoriesTabsProps) => {
-
   const isAllActive = activeTab === 'all' || !activeTab;
+
+  const isMyVideos = basePath.includes(APP_ROUTES.MY_VIDEOS);
 
   return (
     <div className="mb-6 flex flex-wrap gap-2 px-2 pt-4">
       <Link
-        href={basePath || '/'}
+        href={isMyVideos ? APP_ROUTES.MY_VIDEOS : APP_ROUTES.HOME}
         className={`${BASE_TAB_CLASS} ${isAllActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS}`}
       >
         Все
@@ -39,10 +41,14 @@ export const CategoriesTabs = ({
         const displayLabel = foundCategory.label;
         const isCurrentActive = activeTab === categoryKey;
 
+        const tabHref = isMyVideos
+          ? APP_ROUTES.MY_VIDEOS_CATEGORY(categoryKey)
+          : APP_ROUTES.CATEGORY(categoryKey);
+
         return (
           <Link
             key={categoryKey}
-            href={`${basePath}/category/${categoryKey}`}
+            href={tabHref}
             className={`${BASE_TAB_CLASS} ${isCurrentActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS}`}
           >
             {displayLabel}

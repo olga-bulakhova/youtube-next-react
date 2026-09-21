@@ -2,19 +2,15 @@
 
 import Link from 'next/link';
 import { LogoutIcon, ProfileIcon } from '@/shared/icons';
+import { APP_ROUTES } from '@/shared/constants/routes';
 import { useUserMenu } from '../model/useUserMenu';
 
 interface UserMenuProps {
   firstLetter: string;
   username: string;
-  profileId: string;
 }
 
-export const UserMenu = ({
-  firstLetter,
-  username,
-  profileId,
-}: UserMenuProps) => {
+export const UserMenu = ({ firstLetter, username }: UserMenuProps) => {
   const { isOpen, toggleMenu, closeMenu, onLogoutClick } = useUserMenu();
 
   return (
@@ -45,19 +41,21 @@ export const UserMenu = ({
 
           <nav className="flex flex-col gap-0.5">
             <Link
-              href={`/profile/${profileId}`}
+              href={APP_ROUTES.PROFILE}
               onClick={closeMenu}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10 hover:text-white"
+
+              className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10 hover:text-white"
             >
-              <ProfileIcon />
+              <ProfileIcon className="h-5 w-5 opacity-60 transition-opacity duration-200 group-hover:opacity-100" />
               <span>Мой профиль</span>
             </Link>
 
             <button
               onClick={onLogoutClick}
-              className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none"
+
+              className="group flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/10 hover:text-white focus:outline-none"
             >
-              <LogoutIcon />
+              <LogoutIcon className="h-5 w-5 opacity-60 transition-opacity duration-200 group-hover:opacity-100" />
               <span>Выйти</span>
             </button>
           </nav>

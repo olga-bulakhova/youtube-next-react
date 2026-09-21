@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/shared/api/auth';
 import { getErrorMessage } from '@/shared/utils-client';
+import { APP_ROUTES } from '@/shared/constants';
 
 const schema = z
   .object({
@@ -50,7 +51,7 @@ export const useRegisterForm = () => {
         password: formData.password.trim(),
       });
 
-      router.replace('/');
+      router.replace(APP_ROUTES.HOME);
     } catch (error) {
       const message = getErrorMessage(
         error,
