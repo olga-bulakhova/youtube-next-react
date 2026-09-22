@@ -23,6 +23,7 @@ export const APP_ROUTES = {
 export const API_ROUTES = {
   VIDEOS: {
     BASE: '/api/videos',
+    BY_ID: (videoId: string) => `/api/videos/${videoId}`,
   },
   AUTH: {
     LOGIN: '/api/auth/login',

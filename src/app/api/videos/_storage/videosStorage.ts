@@ -1,12 +1,11 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm'; // Добавлен импорт desc
 import { IVideoItem } from './types';
 import { db } from '@/db';
 import { videosTable } from '@/db/schema';
 
 export const videosDb = {
-  // Получить все видео
+  // Получить все видео (Сортировка: сначала новые)
   getAllVideos: async (): Promise<IVideoItem[]> => {
-    // Явно типизируем возвращаемый из базы данных массив строк
     const rows: IVideoItem[] = await db
       .select({
         videoId: videosTable.videoId,
@@ -16,7 +15,8 @@ export const videosDb = {
         category: videosTable.category,
         userId: videosTable.userId,
       })
-      .from(videosTable);
+      .from(videosTable)
+      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
 
     return rows;
   },
@@ -53,61 +53,91 @@ export const videosDb = {
       .selectDistinct({ category: videosTable.category })
       .from(videosTable);
 
-    // Явно указываем тип аргумента в .map()
     return rows.map((row: { category: string }): string => row.category);
   },
 
-  // Получить видео по определенной категории (регистронезависимо через LIKE)
+  // Получить видео по определенной категории (Сортировка: сначала новые)
   getVideosByCategory: async (category: string): Promise<IVideoItem[]> => {
     const cleanCategory: string = category.toLowerCase().trim();
 
-    const rows: IVideoItem[] = await db
-      .select()
+    const rows = await db
+      .select({
+        videoId: videosTable.videoId,
+        title: videosTable.title,
+        authorName: videosTable.authorName,
+        authorUrl: videosTable.authorUrl,
+        category: videosTable.category,
+        userId: videosTable.userId,
+      })
       .from(videosTable)
-      .where(eq(videosTable.category, cleanCategory));
+      .where(eq(videosTable.category, cleanCategory))
+      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
 
-    return rows;
+    return rows as IVideoItem[];
   },
 
   // Получить конкретное видео по его ID
   getVideoById: async (videoId: string): Promise<IVideoItem | undefined> => {
-    const rows: IVideoItem[] = await db
-      .select()
+    const rows = await db
+      .select({
+        videoId: videosTable.videoId,
+        title: videosTable.title,
+        authorName: videosTable.authorName,
+        authorUrl: videosTable.authorUrl,
+        category: videosTable.category,
+        userId: videosTable.userId,
+      })
       .from(videosTable)
       .where(eq(videosTable.videoId, videoId))
       .limit(1);
 
-    return rows[0];
+    return rows[0] as IVideoItem | undefined;
   },
 
-  // Получить все видео конкретного пользователя
+  // Получить все видео конкретного пользователя (Сортировка: сначала новые)
   getVideosByUserId: async (userId: number): Promise<IVideoItem[]> => {
-    const rows: IVideoItem[] = await db
-      .select()
+    const rows = await db
+      .select({
+        videoId: videosTable.videoId,
+        title: videosTable.title,
+        authorName: videosTable.authorName,
+        authorUrl: videosTable.authorUrl,
+        category: videosTable.category,
+        userId: videosTable.userId,
+      })
       .from(videosTable)
-      .where(eq(videosTable.userId, userId));
+      .where(eq(videosTable.userId, userId))
+      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
 
-    return rows;
+    return rows as IVideoItem[];
   },
 
-  // Получить видео пользователя внутри конкретной категории
+  // Получить видео пользователя внутри конкретной категории (Сортировка: сначала новые)
   getVideosByUserIdAndCategory: async (
     userId: number,
     category: string,
   ): Promise<IVideoItem[]> => {
     const cleanCategory: string = category.toLowerCase().trim();
 
-    const rows: IVideoItem[] = await db
-      .select()
+    const rows = await db
+      .select({
+        videoId: videosTable.videoId,
+        title: videosTable.title,
+        authorName: videosTable.authorName,
+        authorUrl: videosTable.authorUrl,
+        category: videosTable.category,
+        userId: videosTable.userId,
+      })
       .from(videosTable)
       .where(
         and(
           eq(videosTable.userId, userId),
           eq(videosTable.category, cleanCategory),
         ),
-      );
+      )
+      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
 
-    return rows;
+    return rows as IVideoItem[];
   },
 
   // Получить только те категории, в которых есть видео этого пользователя
@@ -117,7 +147,18 @@ export const videosDb = {
       .from(videosTable)
       .where(eq(videosTable.userId, userId));
 
-    // Явно указываем тип аргумента и возвращаемого значения в .map()
     return rows.map((row: { category: string }): string => row.category);
+  },
+
+  deleteVideo: async (videoId: string, userId: number): Promise<boolean> => {
+    // Удаляем видео только в том случае, если совпадают и ID видео, и ID автора
+    const result = await db
+      .delete(videosTable)
+      .where(
+        and(eq(videosTable.videoId, videoId), eq(videosTable.userId, userId)),
+      );
+
+    // Возвращаем true, если запись была успешно удалена
+    return true;
   },
 };

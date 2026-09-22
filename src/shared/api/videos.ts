@@ -32,7 +32,7 @@ export const videosApi = {
    * Удалить видео из коллекции (DELETE)
    */
   delete: async (videoId: string): Promise<ApiSuccessResponse> => {
-    return apiFetch<ApiSuccessResponse>(API_ROUTES.VIDEOS.BASE, {
+    return apiFetch<ApiSuccessResponse>(API_ROUTES.VIDEOS.BY_ID(videoId), {
       method: 'DELETE',
       body: JSON.stringify({ videoId }),
     });

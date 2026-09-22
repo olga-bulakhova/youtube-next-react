@@ -4,3 +4,4 @@ export * from './MenuIcon';
 export * from './AddIcon';
 export * from './HomeIcon';
 export * from './VideoIcon';
+export * from './TrashIcon';

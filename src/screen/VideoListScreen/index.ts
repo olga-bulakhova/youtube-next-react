@@ -1,1 +1,1 @@
-export * from './VideosListScreen'
+export * from './ui/VideosListScreen';

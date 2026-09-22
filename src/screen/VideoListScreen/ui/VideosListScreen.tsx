@@ -1,4 +1,3 @@
-
 import { CategoriesTabs } from '@/widgets/CategoriesTabs.tsx/CategoriesTabs';
 import { VideosGrid } from './VideosGrid';
 import { IVideoItem } from '@/app/api/videos/_storage/types';
