@@ -17,22 +17,27 @@ const INACTIVE_TAB_CLASS = 'bg-zinc-900 text-zinc-200 hover:bg-zinc-800';
 export const CategoriesTabs = ({
   activeTab,
   basePath = '',
-  activeCategoriesKeys,
+  activeCategoriesKeys = [],
 }: CategoriesTabsProps) => {
   const isAllActive = activeTab === 'all' || !activeTab;
-
   const isMyVideos = basePath.includes(APP_ROUTES.MY_VIDEOS);
+
+  const hasAnyVideos = activeCategoriesKeys.length > 0;
+
+  if (!hasAnyVideos) return null;
 
   return (
     <div className="mb-6 flex flex-wrap gap-2 px-2 pt-4">
-      <Link
-        href={isMyVideos ? APP_ROUTES.MY_VIDEOS : APP_ROUTES.HOME}
-        className={`${BASE_TAB_CLASS} ${isAllActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS}`}
-      >
-        Все
-      </Link>
+      {hasAnyVideos && (
+        <Link
+          href={isMyVideos ? APP_ROUTES.MY_VIDEOS : APP_ROUTES.HOME}
+          className={`${BASE_TAB_CLASS} ${isAllActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS}`}
+        >
+          Все
+        </Link>
+      )}
 
-      {activeCategoriesKeys?.map((categoryKey) => {
+      {activeCategoriesKeys.map((categoryKey) => {
         const foundCategory = CATEGORIES.find(
           (item) => item.value === categoryKey,
         );

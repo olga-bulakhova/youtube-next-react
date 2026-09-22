@@ -1,28 +1,50 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation'; // [0.3]
 import { videosApi } from '@/shared/api';
+import { useUi } from '@/shared/context/UiContext';
+
+const DELETE_UI_MESSAGES = {
+  CONFIRM: {
+    TITLE: 'Удаление видео',
+    MESSAGE:
+      'Вы уверены, что хотите навсегда удалить это видео из вкладки «Мои видео»?',
+  },
+  SUCCESS: 'Видео успешно удалено из вашей коллекции',
+  ERROR: {
+    UNKNOWN: 'Произошла непредвиденная ошибка при удалении',
+  },
+} as const;
 
 export const useDeleteVideo = () => {
   const router = useRouter();
+  const { showToast, askConfirm } = useUi();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const deleteVideo = async (videoId: string) => {
-    if (!confirm('Вы уверены, что хотите удалить это видео?')) return;
-
+  const executeDelete = async (videoId: string) => {
     try {
-      setDeletingId(videoId); 
+      setDeletingId(videoId);
       await videosApi.delete(videoId);
-      router.refresh(); 
+
+      showToast(DELETE_UI_MESSAGES.SUCCESS, 'success');
+      router.refresh();
     } catch (error) {
       console.error('Ошибка при удалении видео через API:', error);
       if (error instanceof Error) {
-        alert(error.message);
+        showToast(error.message, 'error');
       } else {
-        alert('Произошла непредвиденная ошибка при удалении видео.');
+        showToast(DELETE_UI_MESSAGES.ERROR.UNKNOWN, 'error');
       }
     } finally {
-      setDeletingId(null); 
+      setDeletingId(null);
     }
+  };
+
+  const deleteVideo = (videoId: string) => {
+    askConfirm(
+      DELETE_UI_MESSAGES.CONFIRM.TITLE,
+      DELETE_UI_MESSAGES.CONFIRM.MESSAGE,
+      () => executeDelete(videoId),
+    );
   };
 
   return {
