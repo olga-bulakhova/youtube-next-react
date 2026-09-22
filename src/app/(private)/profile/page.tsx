@@ -1,54 +1,26 @@
-import {
-  withServerAuth,
-  AuthenticatedPageProps,
-} from '@/shared/hoc/withServerAuth/withServerAuth';
+import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
+import { usersDb } from '@/app/api/auth/_storage/usersStorage';
+import { serverCookies } from '@/shared/utils-server';
+import { ProfileScreen } from '@/screen/ProfileScreen'; // Импортируем созданный экран
 
 export const metadata: Metadata = {
   title: 'Настройки профиля',
 };
 
-function ProfilePage({ user }: AuthenticatedPageProps) {
-  const { username, userId } = user;
+export const dynamic = 'force-dynamic';
 
-  return (
-    <div className="mx-auto max-w-2xl p-4">
-      <div className="mb-6 border-b border-zinc-800 pb-4">
-        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          Настройки аккаунта
-        </h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          Управляйте вашими личными данными и конфигурацией интерфейса
-        </p>
-      </div>
+export default async function ProfilePage() {
+  const sessionUser = await serverCookies.getUser();
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-6 backdrop-blur-sm">
-        <h2 className="mb-4 text-lg font-medium text-white">
-          Личная информация
-        </h2>
+  if (!sessionUser || !sessionUser.id) {
+    redirect('/auth/login');
+  }
 
-        <div className="flex flex-col gap-4">
-          <div>
-            <span className="mb-1 block text-xs text-zinc-500">
-              Имя пользователя (Логин)
-            </span>
-            <span className="block rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-200">
-              {username}
-            </span>
-          </div>
+  const dbUser = await usersDb.getUserById(sessionUser.id);
 
-          <div>
-            <span className="mb-1 block text-xs text-zinc-500">
-              Системный идентификатор (User ID)
-            </span>
-            <span className="inline-block rounded-md border border-zinc-800/60 bg-zinc-900/50 px-3 py-1.5 font-mono text-sm text-zinc-400">
-              #{userId}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  if (!dbUser) {
+    notFound();
+  }
+  return <ProfileScreen user={dbUser} />;
 }
-
-export default withServerAuth(ProfilePage);
