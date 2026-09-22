@@ -1,20 +1,21 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation'; // Нативный 404 прерыватель Next.js [0.3]
+import { notFound } from 'next/navigation';
 import { VideosListScreen } from '@/screen/VideoListScreen';
 import { videosDb } from '@/app/api/videos/_storage/videosStorage';
-import { CATEGORIES } from '@/shared/constants';
+import { CATEGORIES, ITEMS_PER_PAGE } from '@/shared/constants';
 import {
   AuthenticatedPageProps,
   withServerAuth,
 } from '@/shared/hoc/withServerAuth/withServerAuth';
 
-type MyVideosCategoryPageProps = {
+type MyVideosCategoryPageProps = AuthenticatedPageProps & {
   params: Promise<{ categoryId: string }>;
+  searchParams: Promise<{ page?: string }>;
 };
 
 export async function generateMetadata({
   params,
-}: MyVideosCategoryPageProps): Promise<Metadata> {
+}: Omit<MyVideosCategoryPageProps, 'user'>): Promise<Metadata> {
   const { categoryId } = await params;
   const foundCategory = CATEGORIES.find((item) => item.value === categoryId);
 
@@ -28,26 +29,34 @@ export async function generateMetadata({
 async function MyVideosCategoryPage({
   params,
   user,
-}: MyVideosCategoryPageProps & AuthenticatedPageProps) {
-  const { categoryId } = await params;
-
-  const { userId } = user;
-
+  searchParams,
+}: MyVideosCategoryPageProps) {
+  const [{ categoryId }, { page }] = await Promise.all([params, searchParams]);
   const isCategoryValid = CATEGORIES.some((item) => item.value === categoryId);
-
   if (!isCategoryValid) {
     notFound();
   }
 
-  const [videos, activeCategoriesKeys] = await Promise.all([
-    videosDb.getVideosByUserIdAndCategory(userId, categoryId),
+  const { userId } = user;
+  const currentPage = Number(page) || 1;
+
+  // 3. Выполняем пагинированные SQL-запросы к SQLite
+  const [{ videos, total }, activeCategoriesKeys] = await Promise.all([
+    videosDb.getVideosByUserIdAndCategory(
+      userId,
+      categoryId,
+      currentPage,
+      ITEMS_PER_PAGE,
+    ),
     videosDb.getActiveCategoriesByUserId(userId),
   ]);
 
   return (
     <VideosListScreen
       videos={videos}
+      totalItems={total}
       category={categoryId}
+      itemsPerPage={ITEMS_PER_PAGE}
       basePath="/my-videos"
       activeCategoriesKeys={activeCategoriesKeys}
       userId={userId}

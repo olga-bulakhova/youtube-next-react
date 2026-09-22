@@ -1,24 +1,44 @@
-import { eq, and, desc } from 'drizzle-orm'; // Добавлен импорт desc
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { IVideoItem } from './types';
 import { db } from '@/db';
 import { videosTable } from '@/db/schema';
 
+export interface PaginatedVideos {
+  videos: IVideoItem[];
+  total: number;
+}
+
 export const videosDb = {
   // Получить все видео (Сортировка: сначала новые)
-  getAllVideos: async (): Promise<IVideoItem[]> => {
-    const rows: IVideoItem[] = await db
-      .select({
-        videoId: videosTable.videoId,
-        title: videosTable.title,
-        authorName: videosTable.authorName,
-        authorUrl: videosTable.authorUrl,
-        category: videosTable.category,
-        userId: videosTable.userId,
-      })
-      .from(videosTable)
-      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
+  getAllVideos: async (
+    page: number = 1,
+    limit: number = 8,
+  ): Promise<PaginatedVideos> => {
+    const offset = (page - 1) * limit;
 
-    return rows;
+    // Запускаем параллельно получение данных и подсчет общего количества строк
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          videoId: videosTable.videoId,
+          title: videosTable.title,
+          authorName: videosTable.authorName,
+          authorUrl: videosTable.authorUrl,
+          category: videosTable.category,
+          userId: videosTable.userId,
+        })
+        .from(videosTable)
+        .orderBy(desc(videosTable.createdAt))
+        .limit(limit) // Ограничиваем выборку [0.4]
+        .offset(offset), // Пропускаем предыдущие страницы [0.4]
+
+      db.select({ count: sql<number>`count(*)` }).from(videosTable),
+    ]);
+
+    return {
+      videos: rows as IVideoItem[],
+      total: countResult[0]?.count || 0,
+    };
   },
 
   // Проверить, существует ли видео
@@ -57,23 +77,41 @@ export const videosDb = {
   },
 
   // Получить видео по определенной категории (Сортировка: сначала новые)
-  getVideosByCategory: async (category: string): Promise<IVideoItem[]> => {
+  getVideosByCategory: async (
+    category: string,
+    page: number = 1,
+    limit: number = 8,
+  ): Promise<PaginatedVideos> => {
     const cleanCategory: string = category.toLowerCase().trim();
+    const offset = (page - 1) * limit;
 
-    const rows = await db
-      .select({
-        videoId: videosTable.videoId,
-        title: videosTable.title,
-        authorName: videosTable.authorName,
-        authorUrl: videosTable.authorUrl,
-        category: videosTable.category,
-        userId: videosTable.userId,
-      })
-      .from(videosTable)
-      .where(eq(videosTable.category, cleanCategory))
-      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
+    // Запускаем параллельно получение отфильтрованных данных и подсчет строк для этой категории
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          videoId: videosTable.videoId,
+          title: videosTable.title,
+          authorName: videosTable.authorName,
+          authorUrl: videosTable.authorUrl,
+          category: videosTable.category, // Возвращено пропущенное поле категории
+          userId: videosTable.userId,
+        })
+        .from(videosTable)
+        .where(eq(videosTable.category, cleanCategory)) // Фильтруем строки по категории [0.4]
+        .orderBy(desc(videosTable.createdAt))
+        .limit(limit) // Ограничиваем выборку под текущую страницу [0.4]
+        .offset(offset), // Пропускаем записи прошлых страниц [0.4]
 
-    return rows as IVideoItem[];
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(videosTable)
+        .where(eq(videosTable.category, cleanCategory)), // 🛡️ ВАЖНО: считаем общее количество видео ТОЛЬКО этой категории [0.4]
+    ]);
+
+    return {
+      videos: rows as IVideoItem[],
+      total: countResult[0]?.count || 0,
+    };
   },
 
   // Получить конкретное видео по его ID
@@ -95,49 +133,82 @@ export const videosDb = {
   },
 
   // Получить все видео конкретного пользователя (Сортировка: сначала новые)
-  getVideosByUserId: async (userId: number): Promise<IVideoItem[]> => {
-    const rows = await db
-      .select({
-        videoId: videosTable.videoId,
-        title: videosTable.title,
-        authorName: videosTable.authorName,
-        authorUrl: videosTable.authorUrl,
-        category: videosTable.category,
-        userId: videosTable.userId,
-      })
-      .from(videosTable)
-      .where(eq(videosTable.userId, userId))
-      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
+  getVideosByUserId: async (
+    userId: number,
+    page: number = 1,
+    limit: number = 8,
+  ): Promise<PaginatedVideos> => {
+    const offset = (page - 1) * limit;
 
-    return rows as IVideoItem[];
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          videoId: videosTable.videoId,
+          title: videosTable.title,
+          authorName: videosTable.authorName,
+          authorUrl: videosTable.authorUrl,
+          category: videosTable.category,
+          userId: videosTable.userId,
+        })
+        .from(videosTable)
+        .where(eq(videosTable.userId, userId))
+        .orderBy(desc(videosTable.createdAt))
+        .limit(limit)
+        .offset(offset),
+
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(videosTable)
+        .where(eq(videosTable.userId, userId)),
+    ]);
+
+    return {
+      videos: rows as IVideoItem[],
+      total: countResult[0]?.count || 0,
+    };
   },
 
   // Получить видео пользователя внутри конкретной категории (Сортировка: сначала новые)
   getVideosByUserIdAndCategory: async (
     userId: number,
     category: string,
-  ): Promise<IVideoItem[]> => {
+    page: number = 1,
+    limit: number = 8,
+  ): Promise<PaginatedVideos> => {
     const cleanCategory: string = category.toLowerCase().trim();
+    const offset = (page - 1) * limit;
 
-    const rows = await db
-      .select({
-        videoId: videosTable.videoId,
-        title: videosTable.title,
-        authorName: videosTable.authorName,
-        authorUrl: videosTable.authorUrl,
-        category: videosTable.category,
-        userId: videosTable.userId,
-      })
-      .from(videosTable)
-      .where(
-        and(
-          eq(videosTable.userId, userId),
-          eq(videosTable.category, cleanCategory),
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          videoId: videosTable.videoId,
+          title: videosTable.title,
+          authorName: videosTable.authorName,
+          authorUrl: videosTable.authorUrl,
+          category: videosTable.category, // Возвращено пропущенное поле категории
+          userId: videosTable.userId,
+        })
+        .from(videosTable)
+        .where(eq(videosTable.category, cleanCategory)) // Фильтруем строки по категории [0.4]
+        .orderBy(desc(videosTable.createdAt))
+        .limit(limit) // Ограничиваем выборку под текущую страницу [0.4]
+        .offset(offset), // Пропускаем записи прошлых страниц [0.4]
+
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(videosTable)
+        .where(
+          and(
+            eq(videosTable.userId, userId),
+            eq(videosTable.category, cleanCategory),
+          ),
         ),
-      )
-      .orderBy(desc(videosTable.createdAt)); // Добавлено упорядочивание
+    ]);
 
-    return rows as IVideoItem[];
+    return {
+      videos: rows as IVideoItem[],
+      total: countResult[0]?.count || 0,
+    };
   },
 
   // Получить только те категории, в которых есть видео этого пользователя

@@ -5,3 +5,5 @@ export * from './AddIcon';
 export * from './HomeIcon';
 export * from './VideoIcon';
 export * from './TrashIcon';
+export * from './ChevronLeftIcon';
+export * from './ChevronRightIcon';

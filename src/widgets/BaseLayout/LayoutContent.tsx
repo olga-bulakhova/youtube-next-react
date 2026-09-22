@@ -15,7 +15,7 @@ export const LayoutContent = ({ children, user }: LayoutContentProps) => {
 
   return (
     <>
-      <main className="flex-1 py-4">{children}</main>
+      <main className="h-full flex-1 py-4">{children}</main>
 
       <div
         onClick={toggleSidebar}
