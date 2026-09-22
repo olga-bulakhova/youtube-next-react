@@ -4,7 +4,6 @@ import {
   ApiErrorResponse,
   AuthRequestBody,
   AuthSuccessResponse,
-  IUser,
 } from '../_storage/types';
 import { usersDb } from '../_storage/usersStorage';
 import { serverCookies } from '@/shared/utils-server/cookies';
@@ -66,22 +65,17 @@ export async function POST(
       );
     }
 
-    if (usersDb.isUsernameTaken(usernameClean)) {
+    // ВАЖНО: Добавлен await, так как проверка теперь идет в файле БД
+    const isTaken = await usersDb.isUsernameTaken(usernameClean);
+    if (isTaken) {
       return apiError(
         REGISTER_ERROR_MESSAGES.BUSINESS_LOGIC.USERNAME_TAKEN,
         400,
       );
     }
 
-    const newUserId = usersDb.getNextId();
-
-    const newUser: IUser = {
-      id: newUserId,
-      username: usernameClean,
-      createdAt: new Date().toISOString(),
-    };
-
-    usersDb.addUser(newUser, passwordClean);
+    // Передаем данные в БД и получаем созданного пользователя с автоинкрементным ID.
+    const newUser = await usersDb.addUser(usernameClean, passwordClean);
 
     const fullTokenString = generateToken({
       userId: newUser.id,
@@ -89,7 +83,7 @@ export async function POST(
     });
 
     console.log(
-      `[AUTH] Новая регистрация и автологин. ID: ${newUserId}, Login: ${usernameClean}`,
+      `[AUTH] Новая регистрация и автологин. ID: ${newUser.id}, Login: ${usernameClean}`,
     );
 
     const userData = {
@@ -108,6 +102,7 @@ export async function POST(
       201,
     );
   } catch (error) {
+    console.error('[REGISTER_ERROR]', error);
     return apiError(
       REGISTER_ERROR_MESSAGES.VALIDATION.INVALID_JSON_OR_SERVER,
       400,

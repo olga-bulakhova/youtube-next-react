@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { db } from '@/app/api/videos/_storage/videosStorage';
+import { videosDb } from '@/app/api/videos/_storage/videosStorage';
 import { VideoScreen } from '@/screen/VideoScreen';
 
 export const dynamic = 'force-dynamic';
@@ -12,15 +12,16 @@ interface VideoPageProps {
   }>;
 }
 
-const getCachedVideo = cache((id: string) => {
-  return db.getVideoById(id);
+const getCachedVideo = cache(async (id: string) => {
+  return await videosDb.getVideoById(id);
 });
 
 export async function generateMetadata({
   params,
 }: VideoPageProps): Promise<Metadata> {
   const { videoId } = await params;
-  const video = getCachedVideo(videoId);
+
+  const video = await getCachedVideo(videoId);
 
   if (!video) {
     notFound();
@@ -33,9 +34,9 @@ export async function generateMetadata({
 
 export default async function VideoPage({ params }: VideoPageProps) {
   const { videoId } = await params;
-  const video = getCachedVideo(videoId);
 
-  // Проверка дублируется как страховочный слой для TypeScript (type guard)
+  const video = await getCachedVideo(videoId);
+
   if (!video) {
     notFound();
   }

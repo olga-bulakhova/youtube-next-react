@@ -7,4 +7,13 @@ export const CATEGORIES = [
   { value: 'comedy', label: 'Юмор' },
   { value: 'science', label: 'Наука' },
   { value: 'sports', label: 'Спорт' },
-] as const; 
+  { value: 'movies', label: 'Кино и сериалы' },
+  { value: 'lifestyle', label: 'Красота и стиль' },
+  { value: 'auto', label: 'Авто и мото' },
+  { value: 'travel', label: 'Путешествия' },
+  { value: 'cooking', label: 'Кулинария и еда' },
+  { value: 'news', label: 'Новости и политика' },
+  { value: 'animation', label: 'Анимация и мультфильмы' },
+  { value: 'finance', label: 'Бизнес и финансы' },
+  { value: 'animals', label: 'Животные' },
+] as const;

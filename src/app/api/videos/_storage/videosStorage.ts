@@ -1,86 +1,123 @@
+import { eq, and } from 'drizzle-orm';
 import { IVideoItem } from './types';
+import { db } from '@/db';
+import { videosTable } from '@/db/schema';
 
-declare global {
-  var prismaMockVideosMap: Map<string, IVideoItem> | undefined;
-}
+export const videosDb = {
+  // Получить все видео
+  getAllVideos: async (): Promise<IVideoItem[]> => {
+    // Явно типизируем возвращаемый из базы данных массив строк
+    const rows: IVideoItem[] = await db
+      .select({
+        videoId: videosTable.videoId,
+        title: videosTable.title,
+        authorName: videosTable.authorName,
+        authorUrl: videosTable.authorUrl,
+        category: videosTable.category,
+        userId: videosTable.userId,
+      })
+      .from(videosTable);
 
-const videosMap =
-  globalThis.prismaMockVideosMap ??
-  new Map<string, IVideoItem>([
-    [
-      '4qcPopWKJlQ',
-      {
-        videoId: '4qcPopWKJlQ',
-        title: 'Вся правда про Next.js',
-        authorName: 'Разработчик',
-        authorUrl: 'https://youtube.com',
-        category: 'tech',
-        userId: 1,
-      },
-    ],
-  ]);
-
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.prismaMockVideosMap = videosMap;
-}
-
-export const db = {
-  getAllVideos: (): IVideoItem[] => {
-    return Array.from(videosMap.values());
+    return rows;
   },
 
-  hasVideo: (videoId: string): boolean => {
-    return videosMap.has(videoId);
+  // Проверить, существует ли видео
+  hasVideo: async (videoId: string): Promise<boolean> => {
+    const rows: { id: string }[] = await db
+      .select({ id: videosTable.videoId })
+      .from(videosTable)
+      .where(eq(videosTable.videoId, videoId))
+      .limit(1);
+
+    return rows.length > 0;
   },
 
-  addVideo: (videoId: string, video: IVideoItem): void => {
-    videosMap.set(videoId, video);
+  // Добавить новое видео
+  addVideo: async (
+    videoId: string,
+    video: Omit<IVideoItem, 'videoId'>,
+  ): Promise<void> => {
+    await db.insert(videosTable).values({
+      videoId: videoId,
+      title: video.title,
+      authorName: video.authorName,
+      authorUrl: video.authorUrl,
+      category: video.category,
+      userId: video.userId,
+    });
   },
 
-  getActiveCategories: (): string[] => {
-    return [
-      ...new Set(Array.from(videosMap.values(), (video) => video.category)),
-    ];
+  // Получить список уникальных категорий, в которых есть видео
+  getActiveCategories: async (): Promise<string[]> => {
+    const rows: { category: string }[] = await db
+      .selectDistinct({ category: videosTable.category })
+      .from(videosTable);
+
+    // Явно указываем тип аргумента в .map()
+    return rows.map((row: { category: string }): string => row.category);
   },
 
-  getVideosByCategory: (category: string): IVideoItem[] => {
-    const cleanCategory = category.toLowerCase().trim();
+  // Получить видео по определенной категории (регистронезависимо через LIKE)
+  getVideosByCategory: async (category: string): Promise<IVideoItem[]> => {
+    const cleanCategory: string = category.toLowerCase().trim();
 
-    return Array.from(videosMap.values()).filter(
-      (video) => video.category.toLowerCase().trim() === cleanCategory,
-    );
+    const rows: IVideoItem[] = await db
+      .select()
+      .from(videosTable)
+      .where(eq(videosTable.category, cleanCategory));
+
+    return rows;
   },
 
-  getVideoById: (videoId: string): IVideoItem | undefined => {
-    return videosMap.get(videoId);
+  // Получить конкретное видео по его ID
+  getVideoById: async (videoId: string): Promise<IVideoItem | undefined> => {
+    const rows: IVideoItem[] = await db
+      .select()
+      .from(videosTable)
+      .where(eq(videosTable.videoId, videoId))
+      .limit(1);
+
+    return rows[0];
   },
 
-  getVideosByUserId: (userId: number): IVideoItem[] => {
-    return Array.from(videosMap.values()).filter(
-      (video) => video.userId === userId,
-    );
+  // Получить все видео конкретного пользователя
+  getVideosByUserId: async (userId: number): Promise<IVideoItem[]> => {
+    const rows: IVideoItem[] = await db
+      .select()
+      .from(videosTable)
+      .where(eq(videosTable.userId, userId));
+
+    return rows;
   },
 
-  getVideosByUserIdAndCategory: (
+  // Получить видео пользователя внутри конкретной категории
+  getVideosByUserIdAndCategory: async (
     userId: number,
     category: string,
-  ): IVideoItem[] => {
-    const cleanCategory = category.toLowerCase().trim();
+  ): Promise<IVideoItem[]> => {
+    const cleanCategory: string = category.toLowerCase().trim();
 
-    return Array.from(videosMap.values()).filter(
-      (video) =>
-        video.userId === userId &&
-        video.category.toLowerCase().trim() === cleanCategory,
-    );
+    const rows: IVideoItem[] = await db
+      .select()
+      .from(videosTable)
+      .where(
+        and(
+          eq(videosTable.userId, userId),
+          eq(videosTable.category, cleanCategory),
+        ),
+      );
+
+    return rows;
   },
 
-  getActiveCategoriesByUserId: (userId: number): string[] => {
-    const userVideos = Array.from(videosMap.values()).filter(
-      (video) => video.userId === userId,
-    );
+  // Получить только те категории, в которых есть видео этого пользователя
+  getActiveCategoriesByUserId: async (userId: number): Promise<string[]> => {
+    const rows: { category: string }[] = await db
+      .selectDistinct({ category: videosTable.category })
+      .from(videosTable)
+      .where(eq(videosTable.userId, userId));
 
-    const uniqueUserCategories = userVideos.map((video) => video.category);
-
-    return [...new Set(uniqueUserCategories)];
+    // Явно указываем тип аргумента и возвращаемого значения в .map()
+    return rows.map((row: { category: string }): string => row.category);
   },
 };

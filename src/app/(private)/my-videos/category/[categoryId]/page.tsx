@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation'; // Нативный 404 прерыватель Next.js [0.3]
 import { VideosListScreen } from '@/screen/VideoListScreen';
-import { db } from '@/app/api/videos/_storage/videosStorage';
+import { videosDb } from '@/app/api/videos/_storage/videosStorage';
 import { CATEGORIES } from '@/shared/constants';
 import {
   AuthenticatedPageProps,
@@ -39,8 +39,10 @@ async function MyVideosCategoryPage({
     notFound();
   }
 
-  const videos = db.getVideosByUserIdAndCategory(userId, categoryId);
-  const activeCategoriesKeys = db.getActiveCategoriesByUserId(userId);
+  const [videos, activeCategoriesKeys] = await Promise.all([
+    videosDb.getVideosByUserIdAndCategory(userId, categoryId),
+    videosDb.getActiveCategoriesByUserId(userId),
+  ]);
 
   return (
     <VideosListScreen

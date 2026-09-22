@@ -1,11 +1,13 @@
 import { VideosListScreen } from '@/screen/VideoListScreen';
-import { db } from '@/app/api/videos/_storage/videosStorage';
+import { videosDb } from '@/app/api/videos/_storage/videosStorage';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const videos = db.getAllVideos();
-  const activeCategoriesKeys = db.getActiveCategories();
+  const [videos, activeCategoriesKeys] = await Promise.all([
+    videosDb.getAllVideos(),
+    videosDb.getActiveCategories(),
+  ]);
 
   return (
     <VideosListScreen

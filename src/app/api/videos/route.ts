@@ -3,10 +3,10 @@ import { apiError, apiSuccess } from '../_utils';
 import {
   ApiErrorResponse,
   ApiSuccessResponse,
-  IVideoItem,
   PostRequestBody,
 } from './_storage/types';
-import { db } from './_storage/videosStorage';
+
+import { videosDb } from './_storage/videosStorage';
 import { checkYoutubeVideo, serverCookies } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
@@ -40,7 +40,9 @@ const VIDEO_ERROR_MESSAGES = {
 } as const;
 
 export async function GET(): Promise<NextResponse<ApiSuccessResponse>> {
-  return apiSuccess({ videos: db.getAllVideos() });
+  // ИЗМЕНЕНИЕ 1: Добавлен await для получения всех видео из базы
+  const allVideos = await videosDb.getAllVideos();
+  return apiSuccess({ videos: allVideos });
 }
 
 export async function POST(
@@ -69,8 +71,9 @@ export async function POST(
 
     const currentUserId = user.id;
 
-    // 3. Проверка на дубликат в локальной базе данных
-    if (db.hasVideo(videoId)) {
+    // ИЗМЕНЕНИЕ 2: Добавлен await для проверки дубликата в реальной базе данных
+    const isVideoExist = await videosDb.hasVideo(videoId);
+    if (isVideoExist) {
       return apiError(VIDEO_ERROR_MESSAGES.DB.ALREADY_EXISTS);
     }
 
@@ -108,9 +111,8 @@ export async function POST(
       return apiError(VIDEO_ERROR_MESSAGES.YOUTUBE_API.NOT_FOUND_OEMBED);
     }
 
-    // Формируем модель данных и сохраняем её
-    const newVideo: IVideoItem = {
-      videoId,
+    // Формируем модель данных без videoId внутри объекта, так как мы передаем его аргументом
+    const videoData = {
       title: videoInfo.title,
       authorName: videoInfo.author_name || 'Неизвестный автор',
       authorUrl: videoInfo.author_url || '',
@@ -118,10 +120,14 @@ export async function POST(
       userId: currentUserId,
     };
 
-    db.addVideo(videoId, newVideo);
+    // ИЗМЕНЕНИЕ 3: Добавлен await при сохранении новой записи в SQLite
+    await videosDb.addVideo(videoId, videoData);
 
-    return apiSuccess({ videos: db.getAllVideos() }, 201);
+    // ИЗМЕНЕНИЕ 4: Добавлен await для возвращения обновленного списка видео
+    const updatedVideos = await videosDb.getAllVideos();
+    return apiSuccess({ videos: updatedVideos }, 201);
   } catch (error) {
+    console.error('[VIDEOS_POST_ERROR]', error); // Логируем ошибку в консоль для отладки
     return apiError(
       VIDEO_ERROR_MESSAGES.VALIDATION.INVALID_BODY_OR_SERVER,
       500,

@@ -1,4 +1,4 @@
-import { db } from '@/app/api/videos/_storage/videosStorage';
+import { videosDb } from '@/app/api/videos/_storage/videosStorage';
 import { VideosListScreen } from '@/screen/VideoListScreen';
 import {
   AuthenticatedPageProps,
@@ -7,11 +7,13 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-function MyVideosPage({ user }: AuthenticatedPageProps) {
+async function MyVideosPage({ user }: AuthenticatedPageProps) {
   const { userId } = user;
 
-  const videos = db.getVideosByUserId(userId);
-  const activeCategoriesKeys = db.getActiveCategoriesByUserId(userId);
+  const [videos, activeCategoriesKeys] = await Promise.all([
+    videosDb.getVideosByUserId(userId),
+    videosDb.getActiveCategoriesByUserId(userId),
+  ]);
 
   return (
     <VideosListScreen

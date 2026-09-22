@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { VideosListScreen } from '@/screen/VideoListScreen';
-import { db } from '@/app/api/videos/_storage/videosStorage';
+import { videosDb } from '@/app/api/videos/_storage/videosStorage';
 import { CATEGORIES } from '@/shared/constants';
 
 type CategoryPageProps = {
@@ -23,14 +23,18 @@ export async function generateMetadata({
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { categoryId } = await params;
+
   const isCategoryValid = CATEGORIES.some((item) => item.value === categoryId);
-  const activeCategoriesKeys = db.getActiveCategories();
 
   if (!isCategoryValid) {
     notFound();
   }
 
-  const videos = db.getVideosByCategory(categoryId);
+  const [videos, activeCategoriesKeys] = await Promise.all([
+    videosDb.getVideosByCategory(categoryId),
+    videosDb.getActiveCategories(),
+  ]);
+
   return (
     <VideosListScreen
       videos={videos}
