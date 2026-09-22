@@ -14,7 +14,7 @@ export const AddVideoScreen = () => {
       subtitle="Вставьте ссылку с YouTube и выберите подходящий раздел"
       maxWidthClassName="max-w-xl"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
         <FormInput
           id="videoUrl"
           label="Ссылка на видео"

@@ -40,7 +40,7 @@ type Inputs = z.infer<typeof schema>;
 
 export const useAddVideoForm = () => {
   const [videoId, setVideoId] = useState<string | null>(null);
-  const { showToast } = useUi(); // Подключаем метод отображения Toast-уведомлений
+  const { showToast } = useUi(); 
 
   const {
     register,
@@ -65,8 +65,6 @@ export const useAddVideoForm = () => {
         videoId: currentVideoId,
         category,
       });
-
-      showToast(ADD_VIDEO_MESSAGES.SERVER.SUCCESS, 'success');
 
       setVideoId(currentVideoId);
       reset();

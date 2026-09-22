@@ -4,9 +4,10 @@ import { IVideoItem } from '@/app/api/videos/_storage/types';
 import { YouTubePlayer } from '@/shared/ui/YouTubePlayer';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useDeleteVideo } from '@/shared/hooks/useDeleteVideo'; // Укажите ваш правильный путь до хука
+import { useDeleteVideo } from '@/shared/hooks/useDeleteVideo';
 import { APP_ROUTES } from '@/shared/constants';
 import { TrashIcon } from '@/shared/icons';
+import { Button } from '@/shared/ui/Button'; // Импортируем нашу универсальную кнопку
 
 type VideoScreenProps = {
   video: IVideoItem;
@@ -15,8 +16,6 @@ type VideoScreenProps = {
 
 export const VideoScreen = ({ video, currentUserId }: VideoScreenProps) => {
   const router = useRouter();
-
-  console.log(currentUserId);
 
   const { deleteVideo, deletingId } = useDeleteVideo(() => {
     router.push(APP_ROUTES.MY_VIDEOS);
@@ -47,23 +46,15 @@ export const VideoScreen = ({ video, currentUserId }: VideoScreenProps) => {
         </div>
 
         {isOwner && (
-          <button
+          <Button
             onClick={() => deleteVideo(video.videoId)}
-            disabled={isDeleting}
-            className="flex cursor-pointer items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:border-red-500 hover:bg-red-600 hover:text-white disabled:pointer-events-none disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-600"
+            isLoading={isDeleting}
+            loadingText="Удаление..."
+            variant="danger"
+            icon={<TrashIcon className="h-4 w-4" />}
           >
-            {isDeleting ? (
-              <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-400 border-t-white" />
-                <span>Удаление...</span>
-              </>
-            ) : (
-              <>
-                <TrashIcon className="h-4 w-4" />
-                <span>Удалить видео</span>
-              </>
-            )}
-          </button>
+            Удалить видео
+          </Button>
         )}
       </div>
     </div>
