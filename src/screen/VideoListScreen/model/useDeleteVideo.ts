@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // [0.3]
+import { useRouter } from 'next/navigation';
 import { videosApi } from '@/shared/api';
 import { useUi } from '@/shared/context/UiContext';
 
