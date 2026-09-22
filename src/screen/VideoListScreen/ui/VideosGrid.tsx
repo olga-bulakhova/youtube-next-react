@@ -4,7 +4,7 @@ import { IVideoItem } from '@/app/api/videos/_storage/types';
 import { APP_ROUTES } from '@/shared/constants';
 import { usePathname } from 'next/navigation';
 import { VideoItem } from './VideoItem';
-import { useDeleteVideo } from '../model/useDeleteVideo';
+import { useDeleteVideo } from '../../../shared/hooks/useDeleteVideo';
 
 interface VideosGridProps {
   videos: IVideoItem[];

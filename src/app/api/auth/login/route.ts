@@ -40,13 +40,18 @@ export async function POST(
     const usernameClean = body.username.trim();
     const passwordClean = body.password.trim();
 
-    const user = usersDb.getUserByUsername(usernameClean);
+    // 🛡️ ИЗМЕНЕНИЕ 1: Добавлен await, чтобы дождаться ответа от SQLite
+    const user = await usersDb.getUserByUsername(usernameClean);
 
     if (!user) {
       return apiError(LOGIN_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 401);
     }
 
-    const isPasswordValid = usersDb.verifyPassword(user.id, passwordClean);
+    // 🛡️ ИЗМЕНЕНИЕ 2: Добавлен await для асинхронной проверки хэша пароля
+    const isPasswordValid = await usersDb.verifyPassword(
+      user.id,
+      passwordClean,
+    );
 
     if (!isPasswordValid) {
       return apiError(LOGIN_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 401);
@@ -77,9 +82,10 @@ export async function POST(
       200,
     );
   } catch (error) {
+    console.error('[LOGIN_CRITICAL_ERROR]', error); // Логируем ошибку, чтобы видеть проблемы в консоли терминала
     return apiError(
       LOGIN_ERROR_MESSAGES.VALIDATION.INVALID_JSON_OR_SERVER,
-      400,
+      400, // Можно изменить на 500, если ошибка произошла внутри кода SQLite
     );
   }
 }

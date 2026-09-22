@@ -7,7 +7,7 @@ const DELETE_UI_MESSAGES = {
   CONFIRM: {
     TITLE: 'Удаление видео',
     MESSAGE:
-      'Вы уверены, что хотите навсегда удалить это видео из вкладки «Мои видео»?',
+      'Вы уверены, что хотите навсегда удалить это видео из вашей коллекции?',
   },
   SUCCESS: 'Видео успешно удалено из вашей коллекции',
   ERROR: {
@@ -15,7 +15,8 @@ const DELETE_UI_MESSAGES = {
   },
 } as const;
 
-export const useDeleteVideo = () => {
+// Добавляем опциональный параметр onSuccessCallback
+export const useDeleteVideo = (onSuccessCallback?: () => void) => {
   const router = useRouter();
   const { showToast, askConfirm } = useUi();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -26,7 +27,13 @@ export const useDeleteVideo = () => {
       await videosApi.delete(videoId);
 
       showToast(DELETE_UI_MESSAGES.SUCCESS, 'success');
-      router.refresh();
+
+      // Если передан колбэк (например, для редиректа), выполняем его
+      if (onSuccessCallback) {
+        onSuccessCallback();
+      } else {
+        router.refresh();
+      }
     } catch (error) {
       console.error('Ошибка при удалении видео через API:', error);
       if (error instanceof Error) {

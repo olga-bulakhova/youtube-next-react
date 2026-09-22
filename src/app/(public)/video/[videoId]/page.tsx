@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { videosDb } from '@/app/api/videos/_storage/videosStorage';
 import { VideoScreen } from '@/screen/VideoScreen';
+import { serverCookies } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,12 +35,12 @@ export async function generateMetadata({
 
 export default async function VideoPage({ params }: VideoPageProps) {
   const { videoId } = await params;
-
+  const user = await serverCookies.getUser();
   const video = await getCachedVideo(videoId);
 
   if (!video) {
     notFound();
   }
 
-  return <VideoScreen video={video} />;
+  return <VideoScreen video={video} currentUserId={user?.id} />;
 }

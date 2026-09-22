@@ -8,7 +8,7 @@ interface VideoItemProps {
   video: IVideoItem;
   showDeleteButton: boolean;
   isDeleting: boolean;
-  onDelete: (videoId: string) => Promise<void>;
+  onDelete: (videoId: string) => void;
 }
 
 export const VideoItem = ({

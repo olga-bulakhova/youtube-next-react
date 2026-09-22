@@ -11,6 +11,9 @@ export const Header = async () => {
   const username = user?.username || '';
   const firstLetter = username ? username.charAt(0).toUpperCase() : '';
 
+  const BUTTON_STYLES =
+    'flex h-10 cursor-pointer items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/15';
+
   return (
     <header className="flex items-center justify-between py-4">
       <div className="flex items-center gap-3">
@@ -21,10 +24,7 @@ export const Header = async () => {
       <div className="flex items-center gap-4">
         {username ? (
           <div className="flex items-center gap-4">
-            <Link
-              href={APP_ROUTES.ADD_VIDEO}
-              className="flex h-9 items-center gap-2 rounded-full bg-white/10 px-4 transition-colors hover:bg-white/15"
-            >
+            <Link href={APP_ROUTES.ADD_VIDEO} className={BUTTON_STYLES}>
               <span className="mb-1 text-2xl leading-none font-light">+</span>
               <span>Добавить</span>
             </Link>
@@ -32,10 +32,7 @@ export const Header = async () => {
             <UserMenu firstLetter={firstLetter} username={username} />
           </div>
         ) : (
-          <Link
-            href={APP_ROUTES.AUTH.LOGIN}
-            className="group flex h-9 items-center gap-2 rounded-full bg-white/10 px-5 transition-colors hover:bg-white/15"
-          >
+          <Link href={APP_ROUTES.AUTH.LOGIN} className={BUTTON_STYLES}>
             <ProfileIcon className="h-5 w-5 opacity-70 transition-opacity duration-200 group-hover:opacity-100" />
             <span className="text-sm font-medium">Войти</span>
           </Link>
