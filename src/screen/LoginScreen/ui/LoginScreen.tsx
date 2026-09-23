@@ -1,9 +1,10 @@
 'use client';
 
-import { FormButton, FormInput, FormCard } from '@/shared/ui/form'; // Подключаем FormCard
+import { FormInput, FormCard } from '@/shared/ui/form'; // Подключаем FormCard
 import Link from 'next/link';
 import { APP_ROUTES } from '@/shared/constants/routes';
 import { useLoginForm } from '../model/useLoginForm';
+import { Button } from '@/shared/ui/Button';
 
 export const LoginScreen = () => {
   const { onSubmit, handleSubmit, ...form } = useLoginForm();
@@ -40,13 +41,14 @@ export const LoginScreen = () => {
             Создать аккаунт
           </Link>
 
-          <FormButton
+          <Button
             isLoading={form.isSubmitting}
             loadingText="Вход..."
+            type="submit"
             className="px-6"
           >
             Войти
-          </FormButton>
+          </Button>
         </div>
       </form>
     </FormCard>

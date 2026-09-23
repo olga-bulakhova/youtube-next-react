@@ -1,9 +1,10 @@
 'use client';
 
-import { FormButton, FormInput, FormCard } from '@/shared/ui/form'; 
+import { FormInput, FormCard } from '@/shared/ui/form';
 import Link from 'next/link';
 import { useRegisterForm } from '../model/useRegisterForm';
 import { APP_ROUTES } from '@/shared/constants';
+import { Button } from '@/shared/ui/Button';
 
 export const RegisterScreen = () => {
   const { onSubmit, handleSubmit, ...form } = useRegisterForm();
@@ -52,13 +53,14 @@ export const RegisterScreen = () => {
             Уже есть аккаунт?
           </Link>
 
-          <FormButton
+          <Button
             isLoading={form.isSubmitting}
             loadingText="Регистрация..."
+            type="submit"
             className="px-6"
           >
             Создать
-          </FormButton>
+          </Button>
         </div>
       </form>
     </FormCard>

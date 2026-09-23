@@ -3,8 +3,9 @@
 import { YouTubePlayer } from '@/shared/ui/YouTubePlayer';
 import { useAddVideoForm } from '../model/useAddVideoForm';
 import { CATEGORIES } from '@/shared/constants';
-import { FormInput, FormSelect, FormButton, FormCard } from '@/shared/ui/form';
+import { FormInput, FormSelect, FormCard } from '@/shared/ui/form';
 import { BackButton } from '@/shared/ui/BackButton';
+import { Button } from '@/shared/ui/Button';
 
 export const AddVideoScreen = () => {
   const { videoId, onSubmit, handleSubmit, ...form } = useAddVideoForm();
@@ -36,13 +37,14 @@ export const AddVideoScreen = () => {
           />
 
           <div className="mt-2">
-            <FormButton
+            <Button
               isLoading={form.isSubmitting}
               loadingText="Добавление..."
+              type="submit"
               className="w-full"
             >
               Добавить видео
-            </FormButton>
+            </Button>
           </div>
         </form>
 
