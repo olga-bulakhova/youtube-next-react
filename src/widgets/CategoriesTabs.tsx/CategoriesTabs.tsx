@@ -30,7 +30,7 @@ export const CategoriesTabs = ({
     <div className="mb-6 flex flex-wrap gap-2 px-2 pt-4">
       {hasAnyVideos && (
         <Link
-          href={isMyVideos ? APP_ROUTES.MY_VIDEOS : APP_ROUTES.HOME}
+          href={isMyVideos ? APP_ROUTES.MY_VIDEOS : APP_ROUTES.VIDEOS}
           className={`${BASE_TAB_CLASS} ${isAllActive ? ACTIVE_TAB_CLASS : INACTIVE_TAB_CLASS}`}
         >
           Все

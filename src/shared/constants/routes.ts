@@ -1,5 +1,6 @@
 export const APP_ROUTES = {
   HOME: '/',
+  VIDEOS: '/videos',
   PROFILE: '/profile',
   MY_VIDEOS: '/my-videos',
   ADD_VIDEO: '/editor/add-video',

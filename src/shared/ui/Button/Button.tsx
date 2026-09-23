@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-type ButtonVariant = 'base' | 'danger';
+type ButtonVariant = 'base' | 'danger' | 'emerald';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -24,11 +24,15 @@ export const Button = ({
   ...props
 }: ButtonProps) => {
   const baseStyles =
-    'flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors disabled:pointer-events-none disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-600';
+    'flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border text-sm font-medium transition-all focus:outline-none disabled:pointer-events-none disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-600';
 
   const variantStyles = {
-    base: 'hover:border-zinc-700 hover:bg-zinc-800 hover:text-white',
-    danger: 'hover:border-red-500 hover:bg-red-600 hover:text-white',
+    base: 'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white',
+    danger:
+      'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-red-500 hover:bg-red-600 hover:text-white',
+
+    emerald:
+      'border-transparent bg-emerald-500 px-5 py-2.5 text-zinc-950 font-semibold shadow-lg shadow-emerald-500/10 hover:bg-emerald-400 hover:scale-[1.02] active:scale-[0.98]',
   };
 
   const finalClassName = `${baseStyles} ${variantStyles[variant]} ${className}`;
