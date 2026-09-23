@@ -1,6 +1,3 @@
-/**
- * 🗺️ КОНСТАНТЫ КЛИЕНТСКИХ СТРАНИЦ (Навигация в браузере)
- */
 export const APP_ROUTES = {
   HOME: '/',
   PROFILE: '/profile',
@@ -15,11 +12,10 @@ export const APP_ROUTES = {
   CATEGORY: (categoryId: string) => `/category/${categoryId}`,
   MY_VIDEOS_CATEGORY: (categoryId: string) =>
     `/my-videos/category/${categoryId}`,
+  SEARCH: (query: string) =>
+    `/search?search=${encodeURIComponent(query.trim())}&page=1`,
 } as const;
 
-/**
- * 🔌 КОНСТАНТЫ БЭКЕНД-ЭНДПОИНТОВ (Запросы к API)
- */
 export const API_ROUTES = {
   VIDEOS: {
     BASE: '/api/videos',
@@ -38,7 +34,5 @@ export const YOUTUBE_ROUTES = {
     `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails,status`,
   EMBED: (videoId: string) =>
     `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
-  CHANNEL: (channelId: string) =>
-    `https://youtube.com/channel/${channelId}`,
+  CHANNEL: (channelId: string) => `https://youtube.com/channel/${channelId}`,
 };
-

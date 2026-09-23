@@ -8,3 +8,4 @@ export * from './TrashIcon';
 export * from './ChevronLeftIcon';
 export * from './ChevronRightIcon';
 export * from './ArrowLeftIcon';
+export * from './SearchIcon';

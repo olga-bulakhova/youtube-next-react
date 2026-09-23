@@ -5,7 +5,7 @@ import { serverCookies } from '@/shared/utils-server';
 import { APP_ROUTES } from '@/shared/constants';
 import { ProfileIcon } from '@/shared/icons';
 import { Button } from '@/shared/ui/Button';
-import { SearchInput } from '@/shared/ui/SearchInput';
+import { SearchInput } from '@/widgets/SearchInput';
 
 export const Header = async () => {
   const user = await serverCookies.getUser();

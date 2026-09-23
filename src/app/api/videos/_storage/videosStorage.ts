@@ -234,9 +234,11 @@ export const videosDb = {
   },
 
   searchVideos: async (
+    page: number = 1,
     query: string,
     limit: number = 11,
   ): Promise<PaginatedVideos> => {
+    const offset = (page - 1) * limit;
     const cleanQuery = query.trim().toLowerCase();
 
     if (!cleanQuery) return { videos: [], total: 0 };
@@ -256,8 +258,8 @@ export const videosDb = {
         .from(videosTable)
         .where(filter)
         .orderBy(desc(videosTable.createdAt))
-        .limit(limit),
-
+        .limit(limit)
+        .offset(offset), // Пропускаем предыдущие страницы [0.4]
       db
         .select({ count: sql<number>`count(*)` })
         .from(videosTable)

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { API_ROUTES } from '@/shared/constants';
 import { IVideoItem } from '@/app/api/videos/_storage/types';
+import { videosApi } from '@/shared/api';
+import { SEARCH } from '@/shared/constants';
 
 export const useLiveSearch = () => {
   const router = useRouter();
@@ -15,17 +16,10 @@ export const useLiveSearch = () => {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // 1. Дебаунс для запросов к API живого поиска
   useEffect(() => {
-    // Создаем таймер дебаунса
     const delayDebounceFn = setTimeout(async () => {
-      // ИЗМЕНЕНИЕ: Если строка пустая, очищаем стейт внутри таймера (асинхронно)
       const trimmedQuery = query.trim();
-
-      // 🌟 ИСПРАВЛЕНО: Если ввели 2 символа или меньше (либо просто пробелы) —
-      // моментально очищаем результаты СИНХРОННО, не дожидаясь таймера дебаунса.
-      // Это исключает лишнее мигание лоадера на клиенте.
-      if (trimmedQuery.length <= 0) {
+      if (trimmedQuery.length < SEARCH.MIN_LENGTH) {
         setResults([]);
         setTotalCount(0);
         setIsLoading(false);
@@ -33,27 +27,20 @@ export const useLiveSearch = () => {
       }
       setIsLoading(true);
       try {
-        const res = await fetch(
-          `${API_ROUTES.VIDEOS.SEARCH}?q=${encodeURIComponent(query)}`,
-        );
-        if (res.ok) {
-          const responseData = await res.json();
-          const data = responseData.data || responseData;
-          setResults(data.videos || []);
-          setTotalCount(data.total || 0);
-        }
+        const responseData = await videosApi.search(trimmedQuery);
+
+        setResults(responseData.videos || []);
+        setTotalCount(responseData.total || 0);
       } catch (err) {
         console.error('Ошибка при живом поиске роликов:', err);
       } finally {
         setIsLoading(false);
       }
-    }, 300); // Задержка 300 мс
+    }, 300);
 
-    // Очищаем таймер, если пользователь продолжает вводить буквы
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
 
-  // 2. Закрытие выпадающего списка при клике мимо инпута
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -71,17 +58,13 @@ export const useLiveSearch = () => {
     e.preventDefault();
     if (!query.trim()) return;
     setIsOpen(false);
-
-    // Перенаправляем на главную страницу с query-параметрами поиска
     router.push(`/?search=${encodeURIComponent(query.trim())}&page=1`);
   };
 
   const closeDropdown = () => setIsOpen(false);
   const openDropdown = () => setIsOpen(true);
-
-  // Ограничиваем выдачу первыми 10 элементами
-  const visibleResults = results.slice(0, 10);
-  const hasMoreThanTen = totalCount > 10;
+  const visibleResults = results.slice(0, SEARCH.SHOW_ALL_RESULTS);
+  const hasMoreThanTen = totalCount > SEARCH.SHOW_ALL_RESULTS;
 
   return {
     query,
