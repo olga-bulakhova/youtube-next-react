@@ -64,6 +64,7 @@ export const VideoItem = ({
           {video.title}
         </Link>
         <Link
+          target="_blank"
           href={video.authorUrl}
           className="w-fit text-xs text-zinc-400 hover:text-zinc-200"
         >

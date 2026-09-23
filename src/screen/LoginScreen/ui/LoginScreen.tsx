@@ -1,6 +1,6 @@
 'use client';
 
-import { FormInput, FormCard } from '@/shared/ui/form'; // Подключаем FormCard
+import { FormInput, FormCard } from '@/shared/ui/form'; 
 import Link from 'next/link';
 import { APP_ROUTES } from '@/shared/constants/routes';
 import { useLoginForm } from '../model/useLoginForm';
@@ -14,6 +14,7 @@ export const LoginScreen = () => {
       title="Войти в аккаунт"
       subtitle="чтобы управлять вашей коллекцией видео"
       maxWidthClassName="max-w-md"
+      className="py-6"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
         <FormInput

@@ -19,13 +19,13 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
   ) => {
     return (
       <div className="relative flex flex-col gap-1.5 pb-5">
-        <label htmlFor={id} className="text-sm font-medium text-gray-200">
+        <label htmlFor={id} className="pl-4 text-sm font-medium text-gray-200">
           {label}
         </label>
         <select
           id={id}
           ref={ref}
-          className={`cursor-pointer rounded-lg border bg-zinc-900 p-2 pr-10 text-white transition-all focus:ring-2 focus:outline-none ${
+          className={`h-10 w-full rounded-full border border-zinc-800 bg-zinc-900/50 px-4 pr-10 text-sm text-zinc-100 placeholder-zinc-500 transition-colors focus:border-zinc-700 focus:bg-zinc-900 focus:outline-none ${
             error
               ? 'border-red-500 focus:ring-red-500/50'
               : 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50'
@@ -44,7 +44,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
           ))}
         </select>
         {error && (
-          <p className="absolute top-17.5 left-0 text-xs text-red-500">
+          <p className="absolute top-17.5 left-0 pl-4 text-xs text-red-500">
             {error}
           </p>
         )}

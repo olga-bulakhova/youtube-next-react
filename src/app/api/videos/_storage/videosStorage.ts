@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, like } from 'drizzle-orm';
 import { IVideoItem } from './types';
 import { db } from '@/db';
 import { videosTable } from '@/db/schema';
@@ -52,7 +52,6 @@ export const videosDb = {
     return rows.length > 0;
   },
 
-  // Добавить новое видео
   addVideo: async (
     videoId: string,
     video: Omit<IVideoItem, 'videoId'>,
@@ -64,6 +63,7 @@ export const videosDb = {
       authorUrl: video.authorUrl,
       category: video.category,
       userId: video.userId,
+      titleSearch: video.title.toLowerCase(),
     });
   },
 
@@ -231,5 +231,45 @@ export const videosDb = {
 
     // Возвращаем true, если запись была успешно удалена
     return true;
+  },
+
+  searchVideos: async (
+    query: string,
+    limit: number = 11,
+  ): Promise<PaginatedVideos> => {
+    const cleanQuery = query.trim().toLowerCase();
+
+    if (!cleanQuery) return { videos: [], total: 0 };
+
+    const filter = like(videosTable.titleSearch, `%${cleanQuery}%`);
+
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          videoId: videosTable.videoId,
+          title: videosTable.title,
+          authorName: videosTable.authorName,
+          authorUrl: videosTable.authorUrl,
+          category: videosTable.category,
+          userId: videosTable.userId,
+        })
+        .from(videosTable)
+        .where(filter)
+        .orderBy(desc(videosTable.createdAt))
+        .limit(limit),
+
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(videosTable)
+        .where(filter),
+    ]);
+
+    const totalCount =
+      countResult && countResult[0] ? Number(countResult[0].count) : 0;
+
+    return {
+      videos: rows as IVideoItem[],
+      total: totalCount,
+    };
   },
 };

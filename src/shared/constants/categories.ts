@@ -16,4 +16,7 @@ export const CATEGORIES = [
   { value: 'animation', label: 'Анимация и мультфильмы' },
   { value: 'finance', label: 'Бизнес и финансы' },
   { value: 'animals', label: 'Животные' },
+  { value: 'development', label: 'Саморазвитие' },
+  { value: 'podcasts', label: 'Подкасты и интервью' },
+  { value: 'reviews', label: 'Обзоры и распаковки' },
 ] as const;

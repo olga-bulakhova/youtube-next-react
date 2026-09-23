@@ -16,9 +16,7 @@ export const FormCard = ({
   maxWidthClassName = 'max-w-md',
 }: FormCardProps) => {
   return (
-    <div
-      className={`flex flex-col items-center justify-center py-6 ${className}`}
-    >
+    <div className={`flex flex-col items-center justify-center ${className}`}>
       <div
         className={`w-full ${maxWidthClassName} rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 shadow-xl backdrop-blur-sm md:p-8`}
       >

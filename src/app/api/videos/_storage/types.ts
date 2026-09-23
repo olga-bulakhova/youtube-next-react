@@ -16,6 +16,7 @@ export interface PostRequestBody {
 export interface ApiSuccessResponse {
   ok: true;
   videos: IVideoItem[];
+  total?: number; // 🔥 Добавлено опциональное поле общего количества видео для поддержки пагинации
 }
 
 export interface ApiErrorResponse {

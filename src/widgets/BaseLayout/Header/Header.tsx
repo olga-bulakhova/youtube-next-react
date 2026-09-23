@@ -5,6 +5,7 @@ import { serverCookies } from '@/shared/utils-server';
 import { APP_ROUTES } from '@/shared/constants';
 import { ProfileIcon } from '@/shared/icons';
 import { Button } from '@/shared/ui/Button';
+import { SearchInput } from '@/shared/ui/SearchInput';
 
 export const Header = async () => {
   const user = await serverCookies.getUser();
@@ -12,13 +13,17 @@ export const Header = async () => {
   const firstLetter = username ? username.charAt(0).toUpperCase() : '';
 
   return (
-    <header className="flex items-center justify-between py-4">
-      <div className="flex items-center gap-3">
+    <header className="flex flex-wrap items-center justify-between py-4 md:flex-nowrap">
+      <div className="order-1 flex items-center gap-3">
         <SidebarToggle />
         <MainLogo />
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="order-3 mt-3 flex min-w-full flex-1 justify-center md:order-2 md:mt-0 md:min-w-auto">
+        <SearchInput />
+      </div>
+
+      <div className="order-2 flex items-center gap-4 md:order-3">
         {username ? (
           <div className="flex items-center gap-4">
             <Button

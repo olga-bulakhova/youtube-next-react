@@ -24,6 +24,7 @@ export const API_ROUTES = {
   VIDEOS: {
     BASE: '/api/videos',
     BY_ID: (videoId: string) => `/api/videos/${videoId}`,
+    SEARCH: '/api/videos/search',
   },
   AUTH: {
     LOGIN: '/api/auth/login',
@@ -31,3 +32,13 @@ export const API_ROUTES = {
     LOGOUT: '/api/auth/logout',
   },
 } as const;
+
+export const YOUTUBE_ROUTES = {
+  VIDEO_CHECK: (videoId: string, apiKey: string) =>
+    `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails,status`,
+  EMBED: (videoId: string) =>
+    `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`,
+  CHANNEL: (channelId: string) =>
+    `https://youtube.com/channel/${channelId}`,
+};
+
