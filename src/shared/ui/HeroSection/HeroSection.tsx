@@ -13,7 +13,7 @@ export const HeroSection = ({ user }: HeroSectionProps) => {
       <div className="pointer-events-none absolute top-1/2 left-1/2 h-[250px] w-[250px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[80px] sm:h-[400px] sm:w-[400px] sm:blur-[100px]" />
       <div className="animate-in fade-in slide-in-from-bottom-4 relative z-10 mx-auto max-w-2xl text-center duration-700 ease-out">
         <h1 className="text-2xl leading-tight font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
-          К чёрту рекомендации. <br className="hidden sm:inline" />
+          К чёрту рекомендации <br className="hidden sm:inline" />
           <span className="mt-1 block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
             Смотри то, что выбрал сам
           </span>

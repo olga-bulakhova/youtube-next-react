@@ -1,8 +1,10 @@
+'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IVideoItem } from '@/app/api/videos/_storage/types';
 import { videosApi } from '@/shared/api';
-import { SEARCH } from '@/shared/constants';
+import { SEARCH, APP_ROUTES } from '@/shared/constants';
 
 export const useLiveSearch = () => {
   const router = useRouter();
@@ -16,29 +18,35 @@ export const useLiveSearch = () => {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      const trimmedQuery = query.trim();
-      if (trimmedQuery.length < SEARCH.MIN_LENGTH) {
-        setResults([]);
-        setTotalCount(0);
-        setIsLoading(false);
-        return;
-      }
-      setIsLoading(true);
-      try {
-        const responseData = await videosApi.search(trimmedQuery);
+  const fetchSearchResults = async (searchQuery: string) => {
+    const trimmedQuery = searchQuery.trim();
 
-        setResults(responseData.videos || []);
-        setTotalCount(responseData.total || 0);
-      } catch (err) {
-        console.error('Ошибка при живом поиске роликов:', err);
-      } finally {
-        setIsLoading(false);
-      }
+    if (trimmedQuery.length < SEARCH.MIN_LENGTH) {
+      setResults([]);
+      setTotalCount(0);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const responseData = await videosApi.search(trimmedQuery);
+
+      setResults(responseData.videos || []);
+      setTotalCount(responseData.total || 0);
+    } catch (err) {
+      console.error('Ошибка при живом поиске роликов:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchSearchResults(query);
     }, 300);
 
-    return () => clearTimeout(delayDebounceFn);
+    return () => clearTimeout(timer);
   }, [query]);
 
   useEffect(() => {
@@ -56,9 +64,15 @@ export const useLiveSearch = () => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    const trimmedQuery = query.trim();
+    if (trimmedQuery.length < SEARCH.MIN_LENGTH) return;
     setIsOpen(false);
-    router.push(`/?search=${encodeURIComponent(query.trim())}&page=1`);
+
+    if (typeof APP_ROUTES.SEARCH === 'function') {
+      router.push(APP_ROUTES.SEARCH(trimmedQuery));
+    } else {
+      router.push(`/search?search=${encodeURIComponent(trimmedQuery)}&page=1`);
+    }
   };
 
   const closeDropdown = () => setIsOpen(false);

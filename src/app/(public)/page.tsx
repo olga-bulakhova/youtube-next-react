@@ -4,13 +4,14 @@ import { HeroSection } from '@/shared/ui/HeroSection';
 import { serverCookies } from '@/shared/utils-server';
 import { APP_ROUTES } from '@/shared/constants/routes';
 import { VideosGrid } from '@/screen/VideoListScreen/ui/VideosGrid';
+import { ITEMS_PER_PAGE } from '@/shared/constants';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const user = await serverCookies.getUser();
 
-  const { videos } = await await videosDb.getAllVideos(1, 8);
+  const { videos } = await videosDb.getAllVideos(1, ITEMS_PER_PAGE);
 
   return (
     <div className="animate-in fade-in w-full pb-12 duration-500">
