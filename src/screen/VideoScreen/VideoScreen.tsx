@@ -8,6 +8,7 @@ import { useDeleteVideo } from '@/shared/hooks/useDeleteVideo';
 import { APP_ROUTES } from '@/shared/constants';
 import { TrashIcon } from '@/shared/icons';
 import { Button } from '@/shared/ui/Button'; // Импортируем нашу универсальную кнопку
+import { BackButton } from '@/shared/ui/BackButton';
 
 type VideoScreenProps = {
   video: IVideoItem;
@@ -28,6 +29,8 @@ export const VideoScreen = ({ video, currentUserId }: VideoScreenProps) => {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-6">
+      <BackButton className='mb-4' />
+
       <YouTubePlayer videoId={video.videoId} autoplay />
 
       <div className="mt-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">

@@ -40,7 +40,6 @@ async function MyVideosCategoryPage({
   const { userId } = user;
   const currentPage = Number(page) || 1;
 
-  // 3. Выполняем пагинированные SQL-запросы к SQLite
   const [{ videos, total }, activeCategoriesKeys] = await Promise.all([
     videosDb.getVideosByUserIdAndCategory(
       userId,

@@ -7,3 +7,4 @@ export * from './VideoIcon';
 export * from './TrashIcon';
 export * from './ChevronLeftIcon';
 export * from './ChevronRightIcon';
+export * from './ArrowLeftIcon';
