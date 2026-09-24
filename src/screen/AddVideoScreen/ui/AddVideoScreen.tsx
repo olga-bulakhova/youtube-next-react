@@ -2,17 +2,24 @@
 
 import { YouTubePlayer } from '@/shared/ui/YouTubePlayer';
 import { useAddVideoForm } from '../model/useAddVideoForm';
-import { CATEGORIES } from '@/shared/constants';
+import { APP_ROUTES, CATEGORIES } from '@/shared/constants';
 import { FormInput, FormSelect, FormCard } from '@/shared/ui/form';
-import { BackButton } from '@/shared/ui/BackButton';
 import { Button } from '@/shared/ui/Button';
+import { ArrowLeftIcon } from '@/shared/icons';
+import Link from 'next/link';
 
 export const AddVideoScreen = () => {
   const { videoId, onSubmit, handleSubmit, ...form } = useAddVideoForm();
 
   return (
     <>
-      <BackButton className="mb-4" />
+      <Link
+        href={APP_ROUTES.MY_VIDEOS}
+        className="group flex w-fit cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-400 transition-colors hover:text-white focus:outline-none"
+      >
+        <ArrowLeftIcon className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+        <span>Мои видео</span>
+      </Link>
       <FormCard
         title="Добавить новое видео"
         subtitle="Вставьте ссылку с YouTube и выберите подходящий раздел"
