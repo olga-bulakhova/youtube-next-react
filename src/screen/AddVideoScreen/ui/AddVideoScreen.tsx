@@ -48,6 +48,7 @@ export const AddVideoScreen = () => {
               isLoading={form.isSubmitting}
               loadingText="Добавление..."
               type="submit"
+              variant="success"
               className="w-full"
             >
               Добавить видео

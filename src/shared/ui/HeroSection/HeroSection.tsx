@@ -42,7 +42,7 @@ export const HeroSection = ({ user }: HeroSectionProps) => {
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button
               href={APP_ROUTES.AUTH.REGISTER}
-              variant="emerald"
+              variant="success"
               className="w-full text-xs sm:w-auto"
             >
               Создать свой хаб бесплатно

@@ -57,6 +57,7 @@ export const LoginScreen = () => {
             isLoading={form.isSubmitting}
             loadingText="Вход..."
             type="submit"
+            variant="success"
             className="min-w-30 px-6"
           >
             Войти

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-type ButtonVariant = 'base' | 'danger' | 'emerald';
+type ButtonVariant = 'base' | 'danger' | 'emerald' | 'success';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -32,6 +32,10 @@ export const Button = ({
       'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-red-500 hover:bg-red-600 hover:text-white',
     emerald:
       'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-transparent hover:bg-emerald-500',
+
+    // 🌟 НОВОЕ: Вариант 'success' со сплошным стабильным зеленым фоном, темным текстом и мягкой тенью
+    success:
+      'border-transparent bg-emerald-500 px-5 py-2.5 text-zinc-950 font-semibold shadow-lg shadow-emerald-500/10 hover:bg-emerald-400 ',
   };
 
   const finalClassName = `${baseStyles} ${variantStyles[variant]} ${className}`;

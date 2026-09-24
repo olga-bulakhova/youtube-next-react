@@ -66,6 +66,7 @@ export const RegisterScreen = () => {
           <Button
             isLoading={form.isSubmitting}
             loadingText="Регистрация..."
+            variant="success"
             type="submit"
             className="min-w-30 px-6"
           >

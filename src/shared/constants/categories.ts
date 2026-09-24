@@ -13,7 +13,7 @@ export const CATEGORIES = [
   { value: 'travel', label: 'Путешествия' },
   { value: 'cooking', label: 'Кулинария и еда' },
   { value: 'news', label: 'Новости и политика' },
-  { value: 'animation', label: 'Анимация и мультфильмы' },
+  { value: 'animation', label: 'Аниме и мультфильмы' },
   { value: 'finance', label: 'Бизнес и финансы' },
   { value: 'animals', label: 'Животные' },
   { value: 'development', label: 'Саморазвитие' },
