@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "tsx src/db/migrate.ts && next build",
     "start": "next start",
     "lint": "eslint",
     "db:push": "drizzle-kit push",
@@ -35,6 +35,7 @@
     "prettier": "^3.9.7",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
