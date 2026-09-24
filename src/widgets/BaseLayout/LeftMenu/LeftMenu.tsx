@@ -18,6 +18,7 @@ export const LeftMenu = ({ user }: LeftMenuProps) => {
 
   const menuItems = [
     { href: APP_ROUTES.HOME, icon: HomeIcon, label: 'Главная' },
+    { href: APP_ROUTES.VIDEOS, icon: VideoIcon, label: 'Видеотека' },
     ...(user
       ? [
           {
