@@ -55,7 +55,7 @@ export async function POST(
       return apiError(LOGIN_ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS, 401);
     }
 
-    const fullTokenString = generateToken({
+    const fullTokenString = await generateToken({
       userId: user.id,
       username: user.username,
     });

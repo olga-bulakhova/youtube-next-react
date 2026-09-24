@@ -84,7 +84,7 @@ export async function POST(
       passwordClean,
     );
 
-    const fullTokenString = generateToken({
+    const fullTokenString = await generateToken({
       userId: newUser.id,
       username: newUser.username,
     });

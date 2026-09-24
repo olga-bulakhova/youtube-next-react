@@ -22,7 +22,7 @@ export const serverCookies = {
 
     if (!tokenCookie?.value) return null;
 
-    const tokenData = getUserDataFromToken(tokenCookie.value);
+    const tokenData = await getUserDataFromToken(tokenCookie.value);
 
     if (!tokenData) return null;
 
