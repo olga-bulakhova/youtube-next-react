@@ -25,8 +25,6 @@ export const apiFetch = async <T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> => {
-  // В браузере BASE_URL будет '', и путь останется относительным '/api/...'
-  // На сервере (если заполнено в .env) подставится полный домен 'http://localhost:3000/api/...'
   const url = `${BASE_URL}${endpoint}`;
   const hasBody = !!options.body;
 
