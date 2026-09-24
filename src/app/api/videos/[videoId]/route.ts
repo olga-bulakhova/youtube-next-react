@@ -1,40 +1,47 @@
 import { NextResponse } from 'next/server';
-import { apiError, apiSuccess } from '../../_utils'; // Укажите правильный относительный путь до ваших утилит
+import { apiError, apiSuccess } from '../../_utils';
 import { videosDb } from '../_storage/videosStorage';
 import { serverCookies } from '@/shared/utils-server';
+import { ITEMS_PER_PAGE } from '@/shared/constants';
 
-type DeleteRouteProps = {
-  params: Promise<{ videoId: string }>;
-};
-
-const DELETE_VIDEO_ERROR_MESSAGES = {
-  AUTH: {
-    UNAUTHORIZED: 'Вы должны быть авторизованы для удаления видео',
-  },
-  SERVER: {
-    CRITICAL_ERROR: 'Не удалось удалить видео. Ошибка сервера',
-  },
-} as const;
+export const dynamic = 'force-dynamic';
 
 export async function DELETE(
   request: Request,
-  { params }: DeleteRouteProps,
+  { params }: { params: Promise<{ videoId: string }> },
 ): Promise<NextResponse> {
   try {
     const { videoId } = await params;
 
-    const user = await serverCookies.getUser();
-    if (!user || !user.id) {
-      return apiError(DELETE_VIDEO_ERROR_MESSAGES.AUTH.UNAUTHORIZED, 401);
+    if (!videoId) {
+      return apiError(
+        'Идентификатор видео (videoId) обязателен для удаления',
+        400,
+      );
     }
 
-    await videosDb.deleteVideo(videoId, user.id);
+    // Проверяем сессию пользователя, который инициировал удаление
+    const user = await serverCookies.getUser();
+    if (!user || !user.id) {
+      return apiError('Действие запрещено. Пожалуйста, авторизуйтесь.', 401);
+    }
 
-    const updatedVideos = await videosDb.getVideosByUserId(user.id);
+    // 🌟 ИСПРАВЛЕНО: Стираем только связь из user_collections текущего пользователя! [0.3]
+    await videosDb.deleteVideoFromCollection(videoId, user.id);
 
-    return apiSuccess({ videos: updatedVideos });
+    console.log(
+      `[API DELETE] Связь с видео ${videoId} успешно удалена у пользователя ID: ${user.id}`,
+    );
+
+    // Возвращаем обновленный список личной коллекции автора
+    const updatedVideos = await videosDb.getMyVideos(
+      user.id,
+      1,
+      ITEMS_PER_PAGE,
+    );
+    return apiSuccess(updatedVideos);
   } catch (error) {
-    console.error('[VIDEO_DELETE_ERROR]', error);
-    return apiError(DELETE_VIDEO_ERROR_MESSAGES.SERVER.CRITICAL_ERROR, 500);
+    console.error('[VIDEOS_DELETE_ERROR]', error);
+    return apiError('Внутренняя ошибка сервера при удалении видеоролика', 500);
   }
 }

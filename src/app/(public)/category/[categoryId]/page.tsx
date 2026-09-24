@@ -10,7 +10,8 @@ type CategoryPageProps = {
 };
 
 // Выносим поиск категории в чистую функцию, чтобы не дублировать логику `.find/.some`
-const getCategoryByValue = (id: string) => CATEGORIES.find((item) => item.value === id);
+const getCategoryByValue = (id: string) =>
+  CATEGORIES.find((item) => item.value === id);
 
 export async function generateMetadata({
   params,

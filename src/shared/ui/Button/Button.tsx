@@ -30,9 +30,8 @@ export const Button = ({
     base: 'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white',
     danger:
       'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-red-500 hover:bg-red-600 hover:text-white',
-
     emerald:
-      'border-transparent bg-emerald-500 px-5 py-2.5 text-zinc-950 font-semibold shadow-lg shadow-emerald-500/10 hover:bg-emerald-400 hover:scale-[1.02] active:scale-[0.98]',
+      'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-transparent hover:bg-emerald-500',
   };
 
   const finalClassName = `${baseStyles} ${variantStyles[variant]} ${className}`;

@@ -41,7 +41,7 @@ async function MyVideosCategoryPage({
   const currentPage = Number(page) || 1;
 
   const [{ videos, total }, activeCategoriesKeys] = await Promise.all([
-    videosDb.getVideosByUserIdAndCategory(
+    videosDb.getMyVideosByCategory(
       userId,
       categoryId,
       currentPage,

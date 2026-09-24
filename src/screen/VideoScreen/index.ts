@@ -1,1 +1,1 @@
-export * from './VideoScreen'
+export * from './ui/VideoScreen'

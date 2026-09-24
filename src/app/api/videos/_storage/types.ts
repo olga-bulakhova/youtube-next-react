@@ -7,6 +7,11 @@ export interface IVideoItem {
   userId: number;
 }
 
+export interface PaginatedVideos {
+  videos: IVideoItem[];
+  total: number;
+}
+
 export interface PostRequestBody {
   videoId: string;
   category: string;
@@ -16,7 +21,7 @@ export interface PostRequestBody {
 export interface ApiSuccessResponse {
   ok: true;
   videos: IVideoItem[];
-  total?: number; // 🔥 Добавлено опциональное поле общего количества видео для поддержки пагинации
+  total?: number; 
 }
 
 export interface ApiErrorResponse {

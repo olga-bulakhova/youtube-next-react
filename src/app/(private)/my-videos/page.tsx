@@ -19,7 +19,7 @@ async function MyVideosPage({ user, searchParams }: MyVideosPageProps) {
   const currentPage = Number(page) || 1;
 
   const [{ videos, total }, activeCategoriesKeys] = await Promise.all([
-    videosDb.getVideosByUserId(userId, currentPage, ITEMS_PER_PAGE),
+    videosDb.getMyVideos(userId, currentPage, ITEMS_PER_PAGE),
     videosDb.getActiveCategoriesByUserId(userId),
   ]);
 

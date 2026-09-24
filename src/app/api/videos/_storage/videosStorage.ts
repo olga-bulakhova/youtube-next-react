@@ -1,22 +1,18 @@
 import { eq, and, desc, sql, like } from 'drizzle-orm';
-import { IVideoItem } from './types';
 import { db } from '@/db';
-import { videosTable } from '@/db/schema';
-
-export interface PaginatedVideos {
-  videos: IVideoItem[];
-  total: number;
-}
+import { videosTable, userCollectionsTable } from '@/db/schema';
+import { IVideoItem, PaginatedVideos } from './types'; // Убедитесь, что пути к типам верны
 
 export const videosDb = {
-  // Получить все видео (Сортировка: сначала новые)
+  /**
+   * 🗺️ 1. ОБЩАЯ ВИДЕТЕКА: Получить все уникальные видео на сайте (с пагинацией)
+   */
   getAllVideos: async (
     page: number = 1,
-    limit: number = 8,
+    limit: number = 12,
   ): Promise<PaginatedVideos> => {
     const offset = (page - 1) * limit;
 
-    // Запускаем параллельно получение данных и подсчет общего количества строк
     const [rows, countResult] = await Promise.all([
       db
         .select({
@@ -24,13 +20,13 @@ export const videosDb = {
           title: videosTable.title,
           authorName: videosTable.authorName,
           authorUrl: videosTable.authorUrl,
-          category: videosTable.category,
-          userId: videosTable.userId,
+          // В общем списке дефолтно отдаем пустую категорию, либо базовую
+          category: sql<string>`'all'`,
         })
         .from(videosTable)
         .orderBy(desc(videosTable.createdAt))
-        .limit(limit) // Ограничиваем выборку [0.4]
-        .offset(offset), // Пропускаем предыдущие страницы [0.4]
+        .limit(limit)
+        .offset(offset),
 
       db.select({ count: sql<number>`count(*)` }).from(videosTable),
     ]);
@@ -41,51 +37,18 @@ export const videosDb = {
     };
   },
 
-  // Проверить, существует ли видео
-  hasVideo: async (videoId: string): Promise<boolean> => {
-    const rows: { id: string }[] = await db
-      .select({ id: videosTable.videoId })
-      .from(videosTable)
-      .where(eq(videosTable.videoId, videoId))
-      .limit(1);
-
-    return rows.length > 0;
-  },
-
-  addVideo: async (
-    videoId: string,
-    video: Omit<IVideoItem, 'videoId'>,
-  ): Promise<void> => {
-    await db.insert(videosTable).values({
-      videoId: videoId,
-      title: video.title,
-      authorName: video.authorName,
-      authorUrl: video.authorUrl,
-      category: video.category,
-      userId: video.userId,
-      titleSearch: video.title.toLowerCase(),
-    });
-  },
-
-  // Получить список уникальных категорий, в которых есть видео
-  getActiveCategories: async (): Promise<string[]> => {
-    const rows: { category: string }[] = await db
-      .selectDistinct({ category: videosTable.category })
-      .from(videosTable);
-
-    return rows.map((row: { category: string }): string => row.category);
-  },
-
-  // Получить видео по определенной категории (Сортировка: сначала новые)
+  /**
+   * 🗺️ ГЛОБАЛЬНАЯ КАТЕГОРИЯ: Получить все уникальные видео на сайте внутри конкретной категории
+   * 🌟 ИСПРАВЛЕНО: Переведено на Many-to-Many схему с группировкой, чтобы избежать дублей роликов
+   */
   getVideosByCategory: async (
     category: string,
     page: number = 1,
-    limit: number = 8,
+    limit: number = 12,
   ): Promise<PaginatedVideos> => {
-    const cleanCategory: string = category.toLowerCase().trim();
+    const cleanCategory = category.toLowerCase().trim();
     const offset = (page - 1) * limit;
 
-    // Запускаем параллельно получение отфильтрованных данных и подсчет строк для этой категории
     const [rows, countResult] = await Promise.all([
       db
         .select({
@@ -93,19 +56,30 @@ export const videosDb = {
           title: videosTable.title,
           authorName: videosTable.authorName,
           authorUrl: videosTable.authorUrl,
-          category: videosTable.category, // Возвращено пропущенное поле категории
-          userId: videosTable.userId,
+          // Отдаем ту категорию, по которой искали
+          category: sql<string>`${cleanCategory}`,
         })
-        .from(videosTable)
-        .where(eq(videosTable.category, cleanCategory)) // Фильтруем строки по категории [0.4]
+        .from(userCollectionsTable)
+        // Склеиваем с метаданными видео [0.2]
+        .innerJoin(
+          videosTable,
+          eq(userCollectionsTable.videoId, videosTable.videoId),
+        )
+        .where(eq(userCollectionsTable.category, cleanCategory))
+        // 🛡️ ВАЖНО: Группируем по videoId, чтобы одно видео не вывелось несколько раз,
+        // если его добавили разные пользователи в одну категорию!
+        .groupBy(videosTable.videoId)
         .orderBy(desc(videosTable.createdAt))
-        .limit(limit) // Ограничиваем выборку под текущую страницу [0.4]
-        .offset(offset), // Пропускаем записи прошлых страниц [0.4]
+        .limit(limit)
+        .offset(offset),
 
+      // Считаем общее количество УНИКАЛЬНЫХ видео в этой категории на всем сайте
       db
-        .select({ count: sql<number>`count(*)` })
-        .from(videosTable)
-        .where(eq(videosTable.category, cleanCategory)), // 🛡️ ВАЖНО: считаем общее количество видео ТОЛЬКО этой категории [0.4]
+        .select({
+          count: sql<number>`count(distinct ${userCollectionsTable.videoId})`,
+        })
+        .from(userCollectionsTable)
+        .where(eq(userCollectionsTable.category, cleanCategory)),
     ]);
 
     return {
@@ -114,7 +88,104 @@ export const videosDb = {
     };
   },
 
-  // Получить конкретное видео по его ID
+  /**
+   * 🔒 2. ВАШИ ВИДЕО: Получить видео конкретного пользователя с помощью INNER JOIN [0.2]
+   */
+  getMyVideos: async (
+    userId: number,
+    page: number = 1,
+    limit: number = 12,
+  ): Promise<PaginatedVideos> => {
+    const offset = (page - 1) * limit;
+
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          videoId: videosTable.videoId,
+          title: videosTable.title,
+          authorName: videosTable.authorName,
+          authorUrl: videosTable.authorUrl,
+          category: userCollectionsTable.category, // Категория берется из персональной коллекции!
+        })
+        .from(userCollectionsTable)
+        // Склеиваем таблицы по совпадению videoId [0.2]
+        .innerJoin(
+          videosTable,
+          eq(userCollectionsTable.videoId, videosTable.videoId),
+        )
+        .where(eq(userCollectionsTable.userId, userId))
+        .orderBy(desc(userCollectionsTable.createdAt))
+        .limit(limit)
+        .offset(offset),
+
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(userCollectionsTable)
+        .where(eq(userCollectionsTable.userId, userId)),
+    ]);
+
+    return {
+      videos: rows as unknown as IVideoItem[],
+      total: countResult[0]?.count || 0,
+    };
+  },
+
+  /**
+   * 🗂️ ПЕРСОНАЛЬНАЯ КАТЕГОРИЯ: Получить видео конкретного пользователя внутри определенной категории
+   * 🌟 ИСПРАВЛЕНО: Переведено на Many-to-Many схему с использованием INNER JOIN [0.2]
+   */
+  getMyVideosByCategory: async (
+    userId: number,
+    category: string,
+    page: number = 1,
+    limit: number = 12,
+  ): Promise<PaginatedVideos> => {
+    const cleanCategory = category.toLowerCase().trim();
+    const offset = (page - 1) * limit;
+
+    const [rows, countResult] = await Promise.all([
+      db
+        .select({
+          videoId: videosTable.videoId,
+          title: videosTable.title,
+          authorName: videosTable.authorName,
+          authorUrl: videosTable.authorUrl,
+          category: userCollectionsTable.category, // Категория берется из персональной связи
+        })
+        .from(userCollectionsTable)
+        // Склеиваем таблицы по идентификатору видео [0.2]
+        .innerJoin(
+          videosTable,
+          eq(userCollectionsTable.videoId, videosTable.videoId),
+        )
+        .where(
+          and(
+            eq(userCollectionsTable.userId, userId),
+            eq(userCollectionsTable.category, cleanCategory),
+          ),
+        )
+        .orderBy(desc(userCollectionsTable.createdAt)) // Сначала новые добавленные связи
+        .limit(limit)
+        .offset(offset),
+
+      // Точный подсчет общего количества видео в этой категории у конкретного юзера
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(userCollectionsTable)
+        .where(
+          and(
+            eq(userCollectionsTable.userId, userId),
+            eq(userCollectionsTable.category, cleanCategory),
+          ),
+        ),
+    ]);
+
+    return {
+      videos: rows as unknown as IVideoItem[],
+      total: countResult[0]?.count || 0,
+    };
+  },
+
   getVideoById: async (videoId: string): Promise<IVideoItem | undefined> => {
     const rows = await db
       .select({
@@ -122,8 +193,7 @@ export const videosDb = {
         title: videosTable.title,
         authorName: videosTable.authorName,
         authorUrl: videosTable.authorUrl,
-        category: videosTable.category,
-        userId: videosTable.userId,
+        category: sql<string>`'all'`,
       })
       .from(videosTable)
       .where(eq(videosTable.videoId, videoId))
@@ -132,115 +202,138 @@ export const videosDb = {
     return rows[0] as IVideoItem | undefined;
   },
 
-  // Получить все видео конкретного пользователя (Сортировка: сначала новые)
-  getVideosByUserId: async (
-    userId: number,
-    page: number = 1,
-    limit: number = 8,
-  ): Promise<PaginatedVideos> => {
-    const offset = (page - 1) * limit;
+  /**
+   * ➕ 3. ДОБАВЛЕНИЕ/ШАРИНГ ВИДЕО УМНЫМ СПОСОБОМ
+   */
+  addVideo: async (
+    videoId: string,
+    payload: {
+      title: string;
+      authorName: string;
+      authorUrl: string;
+      category: string;
+      userId: number;
+    },
+  ): Promise<void> => {
+    // Проверяем, существует ли уже вообще такое видео в глобальной таблице метаданных [1.0]
+    const [existingVideo] = await db
+      .select({ videoId: videosTable.videoId })
+      .from(videosTable)
+      .where(eq(videosTable.videoId, videoId))
+      .limit(1);
 
-    const [rows, countResult] = await Promise.all([
-      db
-        .select({
-          videoId: videosTable.videoId,
-          title: videosTable.title,
-          authorName: videosTable.authorName,
-          authorUrl: videosTable.authorUrl,
-          category: videosTable.category,
-          userId: videosTable.userId,
-        })
-        .from(videosTable)
-        .where(eq(videosTable.userId, userId))
-        .orderBy(desc(videosTable.createdAt))
-        .limit(limit)
-        .offset(offset),
+    // Если видео добавляется на сайт ВПЕРВЫЕ — создаем строку в videosTable [1.0]
+    if (!existingVideo) {
+      await db.insert(videosTable).values({
+        videoId,
+        title: payload.title,
+        authorName: payload.authorName,
+        authorUrl: payload.authorUrl,
+        titleSearch: payload.title.toLowerCase().trim(),
+      });
+    }
 
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(videosTable)
-        .where(eq(videosTable.userId, userId)),
-    ]);
-
-    return {
-      videos: rows as IVideoItem[],
-      total: countResult[0]?.count || 0,
-    };
+    // В обязательном порядке создаем связь в коллекции конкретного пользователя [1.0]
+    await db.insert(userCollectionsTable).values({
+      userId: payload.userId,
+      videoId: videoId,
+      category: payload.category.toLowerCase().trim(),
+    });
   },
 
-  // Получить видео пользователя внутри конкретной категории (Сортировка: сначала новые)
-  getVideosByUserIdAndCategory: async (
+  /**
+   * 🛡️ 4. ПРОВЕРКА: Добавлено ли это видео КОНКРЕТНЫМ пользователем к себе в коллекцию? [1.0]
+   */
+  hasVideoInCollection: async (
+    videoId: string,
     userId: number,
-    category: string,
-    page: number = 1,
-    limit: number = 8,
-  ): Promise<PaginatedVideos> => {
-    const cleanCategory: string = category.toLowerCase().trim();
-    const offset = (page - 1) * limit;
+  ): Promise<boolean> => {
+    const rows = await db
+      .select({ id: userCollectionsTable.id })
+      .from(userCollectionsTable)
+      .where(
+        and(
+          eq(userCollectionsTable.videoId, videoId),
+          eq(userCollectionsTable.userId, userId),
+        ),
+      )
+      .limit(1);
 
-    const [rows, countResult] = await Promise.all([
-      db
-        .select({
-          videoId: videosTable.videoId,
-          title: videosTable.title,
-          authorName: videosTable.authorName,
-          authorUrl: videosTable.authorUrl,
-          category: videosTable.category, // Возвращено пропущенное поле категории
-          userId: videosTable.userId,
-        })
-        .from(videosTable)
-        .where(eq(videosTable.category, cleanCategory)) // Фильтруем строки по категории [0.4]
-        .orderBy(desc(videosTable.createdAt))
-        .limit(limit) // Ограничиваем выборку под текущую страницу [0.4]
-        .offset(offset), // Пропускаем записи прошлых страниц [0.4]
+    return rows.length > 0;
+  },
 
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(videosTable)
+  /**
+   * 🗑️ 5. УДАЛЕНИЕ: Стирает связь видео с пользователем.
+   * 🌟 ОБНОВЛЕНО: Если видео больше не привязано ни к одному клиенту — оно полностью удаляется из системы! [0.3]
+   */
+  deleteVideoFromCollection: async (
+    videoId: string,
+    userId: number,
+  ): Promise<void> => {
+    // Оборачиваем операцию в транзакцию, чтобы всё выполнилось атомарно и безопасно 🛡️
+    await db.transaction(async (tx) => {
+      // Шаг 1: Удаляем связь конкретного текущего пользователя с этим видеороликом [0.3]
+      await tx
+        .delete(userCollectionsTable)
         .where(
           and(
-            eq(videosTable.userId, userId),
-            eq(videosTable.category, cleanCategory),
+            eq(userCollectionsTable.videoId, videoId),
+            eq(userCollectionsTable.userId, userId),
           ),
-        ),
-    ]);
+        );
 
-    return {
-      videos: rows as IVideoItem[],
-      total: countResult[0]?.count || 0,
-    };
+      // Шаг 2: Проверяем, держит ли ещё кто-то на сайте этот ролик в своей коллекции
+      const [remainingConnections] = await tx
+        .select({ count: sql<number>`count(*)` })
+        .from(userCollectionsTable)
+        .where(eq(userCollectionsTable.videoId, videoId));
+
+      const activeLinksCount = remainingConnections?.count || 0;
+
+      // Шаг 3: Если счетчик ссылок обнулился — стираем метаданные видео насовсем!
+      if (activeLinksCount === 0) {
+        await tx.delete(videosTable).where(eq(videosTable.videoId, videoId));
+
+        console.log(
+          `[🚀 ORPHAN CLEANUP] Видео ${videoId} больше никем не используется. Метаданные полностью стерты из videosTable.`,
+        );
+      } else {
+        console.log(
+          `[💾 SAFE DELETE] Связь пользователя ${userId} разорвана. Видео ${videoId} сохранено, так как оно есть у других пользователей (осталось связей: ${activeLinksCount}).`,
+        );
+      }
+    });
   },
 
-  // Получить только те категории, в которых есть видео этого пользователя
-  getActiveCategoriesByUserId: async (userId: number): Promise<string[]> => {
-    const rows: { category: string }[] = await db
-      .selectDistinct({ category: videosTable.category })
+  /**
+   * ⚡ 6. Последние добавленные на сайт видеоролики для витрины Главной страницы
+   */
+  getLatestVideos: async (
+    limit: number = 8,
+  ): Promise<{ videos: IVideoItem[] }> => {
+    const rows = await db
+      .select({
+        videoId: videosTable.videoId,
+        title: videosTable.title,
+        authorName: videosTable.authorName,
+        authorUrl: videosTable.authorUrl,
+        category: sql<string>`'all'`,
+      })
       .from(videosTable)
-      .where(eq(videosTable.userId, userId));
+      .orderBy(desc(videosTable.createdAt))
+      .limit(limit);
 
-    return rows.map((row: { category: string }): string => row.category);
+    return { videos: rows as IVideoItem[] };
   },
 
-  deleteVideo: async (videoId: string, userId: number): Promise<boolean> => {
-    // Удаляем видео только в том случае, если совпадают и ID видео, и ID автора
-    const result = await db
-      .delete(videosTable)
-      .where(
-        and(eq(videosTable.videoId, videoId), eq(videosTable.userId, userId)),
-      );
-
-    // Возвращаем true, если запись была успешно удалена
-    return true;
-  },
-
+  /**
+   * 🔍 7. ЖИВОЙ ПОИСК: Ищет совпадения по глобальной таблице видео
+   */
   searchVideos: async (
-    page: number = 1,
     query: string,
     limit: number = 11,
   ): Promise<PaginatedVideos> => {
-    const offset = (page - 1) * limit;
-    const cleanQuery = query.trim().toLowerCase();
-
+    const cleanQuery = query.toLowerCase().trim();
     if (!cleanQuery) return { videos: [], total: 0 };
 
     const filter = like(videosTable.titleSearch, `%${cleanQuery}%`);
@@ -252,26 +345,45 @@ export const videosDb = {
           title: videosTable.title,
           authorName: videosTable.authorName,
           authorUrl: videosTable.authorUrl,
-          category: videosTable.category,
-          userId: videosTable.userId,
+          category: sql<string>`'all'`,
         })
         .from(videosTable)
         .where(filter)
         .orderBy(desc(videosTable.createdAt))
-        .limit(limit)
-        .offset(offset), // Пропускаем предыдущие страницы [0.4]
+        .limit(limit),
+
       db
         .select({ count: sql<number>`count(*)` })
         .from(videosTable)
         .where(filter),
     ]);
 
-    const totalCount =
-      countResult && countResult[0] ? Number(countResult[0].count) : 0;
-
     return {
       videos: rows as IVideoItem[],
-      total: totalCount,
+      total: countResult[0]?.count || 0,
     };
+  },
+
+  /**
+   * 🏷️ 8. КАТЕГОРИИ: Сбор активных тегов (из всех коллекций пользователей)
+   */
+  getActiveCategories: async (): Promise<string[]> => {
+    const rows = await db
+      .select({ category: userCollectionsTable.category })
+      .from(userCollectionsTable);
+
+    // Собираем уникальные значения через Set
+    const categories = Array.from(new Set(rows.map((r) => r.category)));
+    return categories;
+  },
+
+  getActiveCategoriesByUserId: async (userId: number): Promise<string[]> => {
+    const rows = await db
+      .select({ category: userCollectionsTable.category })
+      .from(userCollectionsTable)
+      .where(eq(userCollectionsTable.userId, userId));
+
+    const categories = Array.from(new Set(rows.map((r) => r.category)));
+    return categories;
   },
 };
