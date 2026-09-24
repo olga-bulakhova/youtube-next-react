@@ -1,6 +1,6 @@
-import { clientEnv } from '../utils-client';
+//import { clientEnv } from '../utils-client';
 
-const BASE_URL = clientEnv.NEXT_PUBLIC_SERVER_API_URL || '';
+const BASE_URL = '';
 
 export const createHeaders = (
   customHeaders?: HeadersInit,
