@@ -1,7 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core';
 
-// Ваша существующая таблица пользователей
+// 👤 Таблица пользователей
 export const usersTable = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   username: text('username').notNull(),
@@ -12,7 +12,7 @@ export const usersTable = sqliteTable('users', {
     .notNull(),
 });
 
-// НОВАЯ ТАБЛИЦА ВИДЕО
+// 📹 Таблица видеороликов
 export const videosTable = sqliteTable('videos', {
   videoId: text('video_id').primaryKey(),
   title: text('title').notNull(),
@@ -26,4 +26,21 @@ export const videosTable = sqliteTable('videos', {
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
   titleSearch: text('title_search').notNull(),
+});
+
+// 🔒 НОВАЯ ТАБЛИЦА: Токены восстановления пароля
+// Полностью синхронизирована по названиям полей с нашими бэкенд-роутами сброса! [0.3]
+export const passwordResetTokensTable = sqliteTable('password_reset_tokens', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+
+  // Внешний ключ, связывающий токен с конкретным пользователем
+  userId: integer('user_id')
+    .notNull()
+    .references(() => usersTable.id, { onDelete: 'cascade' }),
+
+  // Уникальная криптографическая строка токена
+  token: text('token').notNull().unique(),
+
+  // Время истечения срока действия токена (Timestamp в миллисекундах)
+  expiresAt: integer('expires_at').notNull(),
 });

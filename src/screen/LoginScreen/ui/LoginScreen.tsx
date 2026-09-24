@@ -25,16 +25,27 @@ export const LoginScreen = () => {
           {...form.register('email')}
         />
 
-        <FormInput
-          id="password"
-          label="Пароль"
-          type="password"
-          placeholder="Введите ваш пароль..."
-          error={form.errors.password?.message}
-          {...form.register('password')}
-        />
+        <div className="flex flex-col gap-1">
+          <FormInput
+            id="password"
+            label="Пароль"
+            type="password"
+            placeholder="Введите ваш пароль..."
+            error={form.errors.password?.message}
+            {...form.register('password')}
+          />
 
-        <div className="mt-6 flex items-center justify-between gap-4">
+          <div className="px-1 text-right">
+            <Link
+              href="/auth/forgot-password"
+              className="text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300 hover:underline"
+            >
+              Забыли пароль?
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-4">
           <Link
             href={APP_ROUTES.AUTH.REGISTER}
             className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 hover:underline"
@@ -46,7 +57,7 @@ export const LoginScreen = () => {
             isLoading={form.isSubmitting}
             loadingText="Вход..."
             type="submit"
-            className="px-6"
+            className="min-w-30 px-6"
           >
             Войти
           </Button>

@@ -28,3 +28,12 @@ export interface ApiErrorResponse {
   ok: false;
   error: string;
 }
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}

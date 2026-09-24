@@ -67,7 +67,7 @@ export const RegisterScreen = () => {
             isLoading={form.isSubmitting}
             loadingText="Регистрация..."
             type="submit"
-            className="px-6"
+            className="min-w-30 px-6"
           >
             Создать
           </Button>

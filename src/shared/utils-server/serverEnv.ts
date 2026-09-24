@@ -8,9 +8,13 @@ const serverSchema = z.object({
   YOUTUBE_API_KEY: z.string().min(5, {
     message: 'YOUTUBE_API_KEY в .env отсутствует или слишком короткий',
   }),
+  RESEND_API_KEY: z.string().min(5, {
+    message: 'RESEND_API_KEY в .env отсутствует или слишком короткий',
+  }),
 });
 
 export const serverEnv = serverSchema.parse({
   TOKEN_PREFIX: process.env.TOKEN_PREFIX,
   YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY,
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
 });

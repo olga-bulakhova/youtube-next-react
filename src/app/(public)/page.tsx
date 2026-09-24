@@ -18,7 +18,7 @@ export default async function Home() {
       <HeroSection user={user} />
 
       <div className="mx-auto mt-8 max-w-7xl px-4">
-        <div className="mb-6 flex items-center justify-between border-b border-zinc-800 pb-3">
+        <div className="mb-6 items-center justify-between border-b border-zinc-800 pb-3 md:flex">
           <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">
             Свежие поступления в хаб ⚡
           </h2>

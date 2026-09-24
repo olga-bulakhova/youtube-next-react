@@ -8,7 +8,10 @@ export const APP_ROUTES = {
   AUTH: {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
   },
+
   VIDEO: (videoId: string) => `/video/${videoId}`,
   CATEGORY: (categoryId: string) => `/category/${categoryId}`,
   MY_VIDEOS_CATEGORY: (categoryId: string) =>
@@ -27,6 +30,8 @@ export const API_ROUTES = {
     LOGIN: '/api/auth/login',
     REGISTER: '/api/auth/register',
     LOGOUT: '/api/auth/logout',
+    FORGOT_PASSWORD: '/api/auth/forgot-password',
+    RESET_PASSWORD: '/api/auth/reset-password',
   },
 } as const;
 
