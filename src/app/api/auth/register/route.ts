@@ -11,12 +11,11 @@ import { generateToken } from '@/shared/utils-server';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * 🗺️ СЛОВАРЬ ОШИБОК И СИСТЕМНЫХ УВЕДОМЛЕНИЙ ДЛЯ РЕГИСТРАЦИИ
- */
 const REGISTER_ERROR_MESSAGES = {
   VALIDATION: {
     USERNAME_REQUIRED: 'Имя пользователя (username) обязательно для заполнения',
+    EMAIL_REQUIRED: 'Email обязателен для заполнения',
+    EMAIL_INVALID: 'Введите корректный email',
     PASSWORD_REQUIRED: 'Пароль (password) обязателен для заполнения',
     USERNAME_TOO_SHORT: 'Имя пользователя должно содержать минимум 3 символа',
     PASSWORD_TOO_SHORT: 'Пароль должен содержать минимум 6 символов',
@@ -24,7 +23,7 @@ const REGISTER_ERROR_MESSAGES = {
       'Невалидный JSON в теле запроса или критическая ошибка сервера',
   },
   BUSINESS_LOGIC: {
-    USERNAME_TAKEN: 'Пользователь с таким именем уже зарегистрирован',
+    EMAIL_TAKEN: 'Пользователь с таким email уже зарегистрирован',
   },
 } as const;
 
@@ -32,13 +31,18 @@ export async function POST(
   request: Request,
 ): Promise<NextResponse<AuthSuccessResponse | ApiErrorResponse>> {
   try {
-    const body = (await request.json()) as AuthRequestBody;
+    const body = (await request.json()) as AuthRequestBody & { email?: string };
 
+    // 1. Валидация структуры и наличия полей
     if (!body || !body.username || typeof body.username !== 'string') {
       return apiError(
         REGISTER_ERROR_MESSAGES.VALIDATION.USERNAME_REQUIRED,
         400,
       );
+    }
+
+    if (!body.email || typeof body.email !== 'string') {
+      return apiError(REGISTER_ERROR_MESSAGES.VALIDATION.EMAIL_REQUIRED, 400);
     }
 
     if (!body.password || typeof body.password !== 'string') {
@@ -49,8 +53,10 @@ export async function POST(
     }
 
     const usernameClean = body.username.trim();
+    const emailClean = body.email.trim().toLowerCase();
     const passwordClean = body.password.trim();
 
+    // 2. Проверка длины и формата данных
     if (usernameClean.length < 3) {
       return apiError(
         REGISTER_ERROR_MESSAGES.VALIDATION.USERNAME_TOO_SHORT,
@@ -65,25 +71,28 @@ export async function POST(
       );
     }
 
-    // ВАЖНО: Добавлен await, так как проверка теперь идет в файле БД
-    const isTaken = await usersDb.isUsernameTaken(usernameClean);
-    if (isTaken) {
-      return apiError(
-        REGISTER_ERROR_MESSAGES.BUSINESS_LOGIC.USERNAME_TAKEN,
-        400,
-      );
+    // 4. Проверка уникальности Email в базе данных
+    const isEmailTaken = await usersDb.isEmailTaken(emailClean);
+    if (isEmailTaken) {
+      return apiError(REGISTER_ERROR_MESSAGES.BUSINESS_LOGIC.EMAIL_TAKEN, 400);
     }
 
-    // Передаем данные в БД и получаем созданного пользователя с автоинкрементным ID.
-    const newUser = await usersDb.addUser(usernameClean, passwordClean);
+    // 5. Передаем данные в БД (передаем username, email и пароль)
+    const newUser = await usersDb.addUser(
+      usernameClean,
+      emailClean,
+      passwordClean,
+    );
 
     const fullTokenString = generateToken({
       userId: newUser.id,
       username: newUser.username,
     });
 
+    console.log(`[fullTokenString] ${fullTokenString}`);
+
     console.log(
-      `[AUTH] Новая регистрация и автологин. ID: ${newUser.id}, Login: ${usernameClean}`,
+      `[AUTH] Новая регистрация и автологин. ID: ${newUser.id}, Login: ${usernameClean}, Email: ${emailClean}`,
     );
 
     const userData = {

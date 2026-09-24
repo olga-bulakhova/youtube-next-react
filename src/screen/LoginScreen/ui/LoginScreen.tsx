@@ -1,6 +1,6 @@
 'use client';
 
-import { FormInput, FormCard } from '@/shared/ui/form'; 
+import { FormInput, FormCard } from '@/shared/ui/form';
 import Link from 'next/link';
 import { APP_ROUTES } from '@/shared/constants/routes';
 import { useLoginForm } from '../model/useLoginForm';
@@ -18,11 +18,11 @@ export const LoginScreen = () => {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
         <FormInput
-          id="username"
-          label="Логин или Email"
-          placeholder="Введите ваш логин..."
-          error={form.errors.username?.message}
-          {...form.register('username')}
+          id="email"
+          label="Email"
+          placeholder="Введите ваш email..."
+          error={form.errors.email?.message}
+          {...form.register('email')}
         />
 
         <FormInput

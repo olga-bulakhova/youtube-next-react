@@ -18,11 +18,21 @@ export const RegisterScreen = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-1">
         <FormInput
           id="username"
-          label="Имя пользователя или Email"
+
+          label="Имя пользователя"
           placeholder="Придумайте логин..."
           autoComplete="username"
           error={form.errors.username?.message}
           {...form.register('username')}
+        />
+
+        <FormInput
+          id="email"
+          label="Электронная почта (Email)"
+          placeholder="example@mail.com"
+          autoComplete="email"
+          error={form.errors.email?.message}
+          {...form.register('email')}
         />
 
         <FormInput

@@ -9,10 +9,10 @@ import { getErrorMessage } from '@/shared/utils-client';
 import { APP_ROUTES } from '@/shared/constants';
 
 const schema = z.object({
-  username: z
+  email: z
     .string()
     .min(1, { message: 'Введите имя пользователя' })
-    .min(3, { message: 'Имя пользователя должно содержать минимум 3 символа' }),
+    .email({ message: 'Введите корректный адрес электронной почты' }),
   password: z
     .string()
     .min(1, { message: 'Введите пароль' })
@@ -32,7 +32,7 @@ export const useLoginForm = () => {
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   });
@@ -40,13 +40,13 @@ export const useLoginForm = () => {
   const onSubmit: SubmitHandler<Inputs> = async (formData) => {
     try {
       await authApi.login({
-        username: formData.username.trim(),
+        email: formData.email.trim(),
         password: formData.password.trim(),
       });
       router.replace(APP_ROUTES.HOME);
     } catch (error) {
       const message = getErrorMessage(error, 'Не удалось войти в систему');
-      setError('username', {
+      setError('email', {
         type: 'server',
         message: message,
       });

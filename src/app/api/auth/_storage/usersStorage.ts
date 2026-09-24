@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { IUser } from './types';
 import { usersTable } from '@/db/schema';
 import { db } from '@/db';
@@ -38,10 +38,9 @@ export const usersDb = {
   },
 
   // Получить пользователя по имени (регистронезависимо)
-  getUserByUsername: async (username: string): Promise<IUser | undefined> => {
-    const cleanUsername = username.toLowerCase().trim();
+  getUserByEmail: async (email: string): Promise<IUser | undefined> => {
+    const cleanEmail = email.toLowerCase().trim();
 
-    // SQLite по умолчанию выполняет поиск оператором LIKE регистронезависимо
     const rows = await db
       .select({
         id: usersTable.id,
@@ -49,18 +48,23 @@ export const usersDb = {
         createdAt: usersTable.createdAt,
       })
       .from(usersTable)
-      .where(eq(usersTable.username, cleanUsername))
+      .where(eq(sql`lower(${usersTable.email})`, cleanEmail))
       .limit(1);
 
     return rows[0];
   },
 
-  // Добавить пользователя
-  addUser: async (username: string, passwordPlain: string): Promise<IUser> => {
+  //  Добавлен прием параметра email и его сохранение в таблицу базы данных 
+  addUser: async (
+    username: string,
+    email: string,
+    passwordPlain: string,
+  ): Promise<IUser> => {
     const [insertedUser] = await db
       .insert(usersTable)
       .values({
-        username: username,
+        username: username.trim(),
+        email: email.trim().toLowerCase(), // Защита от дубликатов на уровне СУБД 
         passwordHash: hashPassword(passwordPlain),
       })
       .returning({
@@ -72,13 +76,14 @@ export const usersDb = {
     return insertedUser;
   },
 
-  // Проверка занятости имени
-  isUsernameTaken: async (username: string): Promise<boolean> => {
-    const cleanUsername = username.toLowerCase().trim();
+
+  // 🌟 НОВОЕ: Метод для проверки занятости адреса электронной почты в базе данных [0.2]
+  isEmailTaken: async (email: string): Promise<boolean> => {
+    const cleanEmail = email.toLowerCase().trim();
     const rows = await db
       .select({ id: usersTable.id })
       .from(usersTable)
-      .where(eq(usersTable.username, cleanUsername))
+      .where(eq(usersTable.email, cleanEmail))
       .limit(1);
 
     return rows.length > 0;

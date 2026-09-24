@@ -13,6 +13,10 @@ const schema = z
     username: z
       .string()
       .min(3, { message: 'Логин должен содержать минимум 3 символа' }),
+    email: z
+      .string()
+      .min(1, { message: 'Email обязателен для заполнения' })
+      .email({ message: 'Введите корректный адрес электронной почты' }),
     password: z
       .string()
       .min(6, { message: 'Пароль должен содержать минимум 6 символов' }),
@@ -39,6 +43,7 @@ export const useRegisterForm = () => {
     resolver: zodResolver(schema),
     defaultValues: {
       username: '',
+      email: '',
       password: '',
       confirmPassword: '',
     },
@@ -48,6 +53,7 @@ export const useRegisterForm = () => {
     try {
       await authApi.register({
         username: formData.username.trim(),
+        email: formData.email.trim().toLowerCase(),
         password: formData.password.trim(),
       });
 
@@ -58,10 +64,19 @@ export const useRegisterForm = () => {
         'Не удалось связаться с сервером. Попробуйте позже.',
       );
 
-      setError('username', {
-        type: 'server',
-        message,
-      });
+      if (message.toLowerCase().includes('email')) {
+        console.log('email', message);
+
+        setError('email', {
+          type: 'server',
+          message,
+        });
+      } else {
+        setError('username', {
+          type: 'server',
+          message,
+        });
+      }
     }
   };
 

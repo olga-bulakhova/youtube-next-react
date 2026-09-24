@@ -4,7 +4,8 @@ import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core';
 // Ваша существующая таблица пользователей
 export const usersTable = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  username: text('username').notNull().unique(),
+  username: text('username').notNull(),
+  email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   createdAt: text('created_at')
     .default(sql`(CURRENT_TIMESTAMP)`)

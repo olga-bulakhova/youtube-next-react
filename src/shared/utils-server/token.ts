@@ -1,5 +1,4 @@
-import { serverEnv } from "./serverEnv";
-
+import { serverEnv } from './serverEnv';
 
 interface TokenPayload {
   userId: number;
@@ -8,13 +7,11 @@ interface TokenPayload {
 
 const TOKEN_PREFIX = serverEnv.TOKEN_PREFIX;
 
-/**
- * Безопасно генерирует mock-JWT токен на сервере (кодирует данные в Base64) [0.2]
- */
 export const generateToken = (payload: TokenPayload): string => {
   try {
     const jsonString = JSON.stringify(payload);
-    const base64Hash = btoa(jsonString); // Переводим JSON-строку в Base64 хэш [0.2]
+
+    const base64Hash = Buffer.from(jsonString, 'utf-8').toString('base64');
 
     return `${TOKEN_PREFIX}${base64Hash}`;
   } catch (error) {
@@ -23,9 +20,6 @@ export const generateToken = (payload: TokenPayload): string => {
   }
 };
 
-/**
- * Безопасно расшифровывает ваш mock-JWT токен и возвращает данные (userId, username)
- */
 export const getUserDataFromToken = (
   fullTokenString: string | undefined,
 ): TokenPayload | null => {
@@ -34,13 +28,10 @@ export const getUserDataFromToken = (
   }
 
   try {
-    // 1. Отрезаем префикс, чтобы оставить чистый Base64 хэш
     const base64Part = fullTokenString.replace(TOKEN_PREFIX, '');
 
-    // 2. Расшифровываем Base64 обратно в JSON-строку [0.2]
-    const jsonString = atob(base64Part);
+    const jsonString = Buffer.from(base64Part, 'base64').toString('utf-8');
 
-    // 3. Превращаем строку в типизированный объект
     return JSON.parse(jsonString) as TokenPayload;
   } catch (error) {
     console.error('Ошибка расшифровки токена авторизации:', error);

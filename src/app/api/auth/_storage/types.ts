@@ -13,8 +13,9 @@ export interface IUserCookie {
  * Тело запроса для авторизации (POST /api/auth/login)
  */
 export interface AuthRequestBody {
-  username: string;
   password: string;
+  username?: string; // 🌟 ИСПРАВЛЕНО: Убрано поле username из AuthRequestBody [0.2]
+  email: string; // 🌟 ИСПРАВЛЕНО: Добавлен параметр email для проверки на занятость адреса электронной почты [0.2]
 }
 
 export interface AuthSuccessResponse {
