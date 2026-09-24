@@ -5,7 +5,7 @@ import { serverCookies } from '@/shared/utils-server';
 import { ProfileScreen } from '@/screen/ProfileScreen'; // Импортируем созданный экран
 
 export const metadata: Metadata = {
-  title: 'Настройки профиля',
+  title: 'Мой профиль | Личный Видео-Хаб',
 };
 
 export const dynamic = 'force-dynamic';

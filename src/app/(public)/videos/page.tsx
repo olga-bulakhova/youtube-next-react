@@ -1,14 +1,22 @@
 import { VideosListScreen } from '@/screen/VideoListScreen';
 import { videosDb } from '@/app/api/videos/_storage/videosStorage';
 import { ITEMS_PER_PAGE } from '@/shared/constants';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
-type HomeProps = {
+type AllVideosPageProps = {
   searchParams: Promise<{ page?: string }>;
 };
 
-export default async function Home({ searchParams }: HomeProps) {
+
+export const metadata: Metadata = {
+  title: 'Общая Видеотека | Личный Видео-Хаб',
+  description:
+    'Глобальный каталог полезных видеоматериалов, лекций и туториалов, собранный пользователями хаба. Полная свобода от навязчивых алгоритмов.',
+};
+
+export default async function AllVideosPage({ searchParams }: AllVideosPageProps) {
   const { page } = await searchParams;
   const currentPage = Number(page) || 1;
 

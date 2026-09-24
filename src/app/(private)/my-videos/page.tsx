@@ -5,8 +5,15 @@ import {
   AuthenticatedPageProps,
 } from '@/shared/hoc/withServerAuth/withServerAuth'; // Используем ваш готовый интерфейс [0.3]
 import { ITEMS_PER_PAGE } from '@/shared/constants';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Моя коллекция | Личный Видео-Хаб',
+  description:
+    'Управление вашими сохраненными видеоматериалами, лекциями и туториалами без алгоритмов и шума.',
+};
 
 type MyVideosPageProps = AuthenticatedPageProps & {
   searchParams: Promise<{ page?: string }>;

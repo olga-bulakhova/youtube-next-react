@@ -5,8 +5,15 @@ import { serverCookies } from '@/shared/utils-server';
 import { APP_ROUTES } from '@/shared/constants/routes';
 import { VideosGrid } from '@/screen/VideoListScreen/ui/VideosGrid';
 import { ITEMS_PER_PAGE } from '@/shared/constants';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Личный Видео-Хаб',
+  description:
+    'Изолированное персональное пространство для хранения знаний и видеоматериалов. Только то контент, который вы выбрали сами, без рекламы и кликбейта.',
+};
 
 export default async function Home() {
   const user = await serverCookies.getUser();

@@ -327,17 +327,21 @@ export const videosDb = {
   },
 
   /**
-   * 🔍 7. ЖИВОЙ ПОИСК: Ищет совпадения по глобальной таблице видео
+   * 🔍 7. ЖИВОЙ И БОЛЬШОЙ ПОИСК: Ищет совпадения по глобальной таблице видео (с пагинацией)
+   * 🌟 ИСПРАВЛЕНО: Добавлен параметр page и полноценный расчет offset для листания страниц [0.2]
    */
   searchVideos: async (
+    page: number = 1, // 🌟 Новое: текущая страница
     query: string,
-    limit: number = 11,
+
+    limit: number = 12, // Стандартизировали лимит под сетку карточек
   ): Promise<PaginatedVideos> => {
     const cleanQuery = query.toLowerCase().trim();
     if (!cleanQuery) return { videos: [], total: 0 };
 
+    // Высчитываем, сколько видеороликов нужно пропустить для текущей страницы [0.2]
+    const offset = (page - 1) * limit;
     const filter = like(videosTable.titleSearch, `%${cleanQuery}%`);
-
     const [rows, countResult] = await Promise.all([
       db
         .select({
@@ -345,13 +349,15 @@ export const videosDb = {
           title: videosTable.title,
           authorName: videosTable.authorName,
           authorUrl: videosTable.authorUrl,
-          category: sql<string>`'all'`,
+          category: sql<string>`'all'`, // Для результатов глобального поиска отдаем дефолтную категорию
         })
         .from(videosTable)
         .where(filter)
         .orderBy(desc(videosTable.createdAt))
-        .limit(limit),
+        .limit(limit) // 🌟 Ограничиваем количество роликов на страницу [0.2]
+        .offset(offset), // 🌟 Сдвигаем курсор на нужный offset [0.2]
 
+      // Считаем общее количество найденных совпадений по всему хабу
       db
         .select({ count: sql<number>`count(*)` })
         .from(videosTable)
