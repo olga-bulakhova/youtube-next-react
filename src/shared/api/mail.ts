@@ -1,13 +1,24 @@
 import 'server-only';
-import { Resend } from 'resend';
-import { serverEnv } from '../utils-server/serverEnv';
+import nodemailer from 'nodemailer';
 
-const apiKey = serverEnv.RESEND_API_KEY;
+const host = process.env.SMTP_HOST;
+const port = Number(process.env.SMTP_PORT) || 465;
+const user = process.env.SMTP_USER;
+const pass = process.env.SMTP_PASSWORD;
 
-if (!apiKey) {
+if (!user || !pass || !host) {
   console.warn(
-    '⚠️ [MAIL_SYSTEM] Внимание: Переменная RESEND_API_KEY отсутствует в файле .env. Письма не будут отправляться!',
+    '⚠️ [MAIL_SYSTEM] Настройки SMTP (host, user или password) отсутствуют в .env. Письма не будут отправляться!',
   );
 }
 
-export const mailer = new Resend(apiKey);
+
+export const mailer = nodemailer.createTransport({
+  host,
+  port,
+  secure: port === 465, 
+  auth: {
+    user,
+    pass,
+  },
+});
