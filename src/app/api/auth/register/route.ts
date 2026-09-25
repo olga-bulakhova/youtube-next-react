@@ -71,7 +71,7 @@ export async function POST(
       );
     }
 
-    // 4. Проверка уникальности Email в базе данных
+    // 4. Проверка уникальности Email в базе
     const isEmailTaken = await usersDb.isEmailTaken(emailClean);
     if (isEmailTaken) {
       return apiError(REGISTER_ERROR_MESSAGES.BUSINESS_LOGIC.EMAIL_TAKEN, 400);
