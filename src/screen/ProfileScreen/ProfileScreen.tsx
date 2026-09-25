@@ -11,7 +11,7 @@ type ProfileScreenProps = {
 };
 
 export const ProfileScreen = ({ user }: ProfileScreenProps) => {
-  const { username, id, createdAt } = user;
+  const { username, createdAt } = user;
 
   const registrationDate = createdAt
     ? new Intl.DateTimeFormat('ru-RU', {
@@ -28,7 +28,7 @@ export const ProfileScreen = ({ user }: ProfileScreenProps) => {
           Личный профиль
         </h1>
         <p className="mt-1 text-sm text-zinc-400">
-          Информация о вашем системном аккаунте и активности в приложении
+          Информация о вашем системном аккаунте
         </p>
       </div>
 
@@ -47,15 +47,6 @@ export const ProfileScreen = ({ user }: ProfileScreenProps) => {
               </span>
             </div>
           </div>
-
-          <ProfileInfoRow
-            title="Идентификатор аккаунта"
-            description="Уникальный ID "
-          >
-            <span className="rounded-md border border-zinc-800 bg-zinc-900 px-3 py-1 font-mono text-xs text-zinc-400">
-              #{id}
-            </span>
-          </ProfileInfoRow>
 
           <ProfileInfoRow
             title="Дата создания профиля"
