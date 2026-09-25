@@ -24,7 +24,7 @@ export const Button = ({
   ...props
 }: ButtonProps) => {
   const baseStyles =
-    'flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border text-sm font-medium transition-all focus:outline-none disabled:pointer-events-none disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-600';
+    'flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border text-sm font-medium transition-all focus:outline-none disabled:shadow-none disabled:pointer-events-none disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-600';
 
   const variantStyles = {
     base: 'border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white',
