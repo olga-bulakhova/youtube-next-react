@@ -37,7 +37,7 @@ export const AddVideoScreen = () => {
           <FormSelect
             id="category"
             label="Категория видео"
-            placeholder="Выберите категория..."
+            placeholder="Выберите категорию..."
             options={CATEGORIES}
             error={form.errors.category?.message}
             {...form.register('category')}
